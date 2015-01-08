@@ -94,11 +94,11 @@ public class RobotPlayer {
 		} catch (GameActionException ge) {
 			ge.printStackTrace();
 		}
-	}
+	} // end of run method
 
 	private static Direction randomDirection() {
 		return Direction.values()[rand.nextInt(8)];
-	}
+	} // end of randomDirection method
 
 	private static void moveAround() throws GameActionException {
 		if (rc.isCoreReady()) {
@@ -115,7 +115,7 @@ public class RobotPlayer {
 				currentDirection = currentDirection.rotateRight();
 			}
 		}
-	}
+	} // end of moveAround method
 
 	private static void attackEnemyZero() throws GameActionException {
 		if (rc.isWeaponReady()) {
@@ -125,7 +125,7 @@ public class RobotPlayer {
 				rc.attackLocation(enemies[0].location);
 			}
 		}
-	}
+	} // end of attackEnemyZero method
 
 	private static void trainingfield() {
 		while (true) {
@@ -174,6 +174,7 @@ public class RobotPlayer {
 		while (true) {
 			attackEnemyZero();
 			moveTowardsHQ();
+			//transferSupply();
 			rc.yield();
 		}
 
@@ -198,9 +199,10 @@ public class RobotPlayer {
 			mine();
 			moveAround();
 			attackEnemyZero();
+			//transferSupply();
 			rc.yield();
 		}
-	}
+	} // end of miner method
 
 	private static void launcher() {
 		while (true) {
@@ -213,8 +215,10 @@ public class RobotPlayer {
 		while (true) {
 			attackEnemyZero();
 			spawnRobot(RobotType.BEAVER);
+			transferSupply();
+			rc.yield();
 		}
-	}
+	} // end of hq method
 
 	private static void spawnRobot(RobotType type) throws GameActionException {
 		if (rc.hasSpawnRequirements(type) && rc.isCoreReady()) {
@@ -225,7 +229,7 @@ public class RobotPlayer {
 				}
 			}
 		}
-	}
+	} // end of spawnRobot method
 
 	private static void helipad() {
 		while (true) {
@@ -266,10 +270,16 @@ public class RobotPlayer {
 		while (true) {
 			mine();
 			moveAround();
+			if(rand.nextInt(100) > 50) {
 			build(Clock.getRoundNum() > 350 ? RobotType.BARRACKS
 					: RobotType.MINERFACTORY);
+			} else {
+				buildSupplyDepot();
+			}
+			transferSupply();
+			rc.yield();
 		}
-	}
+	} // end of beaver method
 
 	private static void build(RobotType building) throws GameActionException {
 		if (rc.hasBuildRequirements(building) && rc.isCoreReady()) {
@@ -281,7 +291,7 @@ public class RobotPlayer {
 					currentDirection = currentDirection.rotateRight();
 			}
 		}
-	}
+	} // end of build method
 
 	private static void mine() throws GameActionException {
 		int mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
@@ -290,11 +300,12 @@ public class RobotPlayer {
 		if (rc.isCoreReady() && rc.senseOre(rc.getLocation()) > mineMax) {
 			rc.mine();
 		}
-	}
+	} // end of mine method
 
 	private static void basher() throws GameActionException {
 		while (true) {
 			moveTowardsHQ();
+			//transferSupply();
 			rc.yield();
 		}
 
@@ -318,7 +329,7 @@ public class RobotPlayer {
 				currentDirection = currentDirection.rotateRight();
 			}
 		}
-	}
+	} // end of moveTowardsHQ method
 
 	private static void barracks() throws GameActionException {
 		while (true) {
@@ -334,5 +345,63 @@ public class RobotPlayer {
 		}
 
 	}
-
-}
+	
+	private static void buildSupplyDepot() throws GameActionException {
+		MapLocation currentLoc = rc.getLocation();
+		int distanceFromHQ = currentLoc.distanceSquaredTo(rc.senseHQLocation());
+		if (Clock.getRoundNum() < 500) {
+			if (rand.nextInt(100) < 10) {
+				if (distanceFromHQ < 40 && distanceFromHQ > 20) {
+					build(RobotType.SUPPLYDEPOT);
+				}
+			}
+		}
+	} // end of buildSupplyDepot method
+	
+	// transfer supply to other robots that have less supply
+	private static void transferSupply() throws GameActionException {
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(), GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, rc.getTeam());
+		double lowestSupply = rc.getSupplyLevel();
+		double transferAmount = 0;
+		MapLocation transferDestination = null;
+		if (nearbyAllies.length > 0) {
+		for (RobotInfo robot : nearbyAllies) {
+			if (robot.supplyLevel < lowestSupply) {
+				lowestSupply = robot.supplyLevel;
+				transferAmount = ((rc.getSupplyLevel() - robot.supplyLevel)/2);
+				transferDestination = robot.location;
+			}
+		  }
+		}
+		if (transferDestination != null) {
+			int transferDistance = transferDestination.distanceSquaredTo(rc.getLocation());
+			if (transferDistance <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
+				rc.transferSupplies((int)transferAmount, transferDestination);
+		}
+	  }
+	} // end of transferSupply method
+	
+	// this method isn't being used, but could be used for efficient direction changing
+	private static int directionNum(Direction d) {
+		switch(d) {
+		case NORTH:
+			return 0;
+		case NORTH_WEST: 
+			return 1;
+		case WEST:
+			return 2;
+		case SOUTH_WEST:
+			return 3;
+		case SOUTH:
+			return 4;
+		case SOUTH_EAST:
+			return 5;
+		case EAST:
+			return 6;
+		case NORTH_EAST:
+			return 7;
+		default:
+			return -1;
+		}
+	} // end of directionNum method
+} // end of RobotPlayer class
