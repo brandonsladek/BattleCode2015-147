@@ -17,7 +17,7 @@ public class RobotPlayer {
 	private static Random rand;
 	private static Direction currentDirection;
 	private static MapLocation enemyHQLoc;
-
+	
 	public static void run(RobotController myRC) {
 
 		rc = myRC;
@@ -126,7 +126,7 @@ public class RobotPlayer {
 			}
 		}
 	} // end of attackEnemyZero method
-
+	
 	private static void trainingfield() {
 		while (true) {
 			rc.yield();
@@ -144,6 +144,7 @@ public class RobotPlayer {
 	private static void tower() throws GameActionException {
 		while (true) {
 			attackEnemyZero();
+			transferSupply();
 			rc.yield();
 		}
 
@@ -163,8 +164,9 @@ public class RobotPlayer {
 
 	}
 
-	private static void supplydepot() {
+	private static void supplydepot() throws GameActionException {
 		while (true) {
+			transferSupply();
 			rc.yield();
 		}
 
@@ -174,7 +176,7 @@ public class RobotPlayer {
 		while (true) {
 			attackEnemyZero();
 			moveTowardsHQ();
-			//transferSupply();
+			transferSupply();
 			rc.yield();
 		}
 
@@ -199,7 +201,7 @@ public class RobotPlayer {
 			mine();
 			moveAround();
 			attackEnemyZero();
-			//transferSupply();
+			transferSupply();
 			rc.yield();
 		}
 	} // end of miner method
@@ -274,8 +276,9 @@ public class RobotPlayer {
 			build(Clock.getRoundNum() > 350 ? RobotType.BARRACKS
 					: RobotType.MINERFACTORY);
 			} else {
-				buildSupplyDepot();
+				buildSupplyDepotNearHQ();
 			}
+			attackEnemyZero();
 			transferSupply();
 			rc.yield();
 		}
@@ -305,7 +308,7 @@ public class RobotPlayer {
 	private static void basher() throws GameActionException {
 		while (true) {
 			moveTowardsHQ();
-			//transferSupply();
+			transferSupply();
 			rc.yield();
 		}
 
@@ -346,17 +349,29 @@ public class RobotPlayer {
 
 	}
 	
-	private static void buildSupplyDepot() throws GameActionException {
+	private static void buildSupplyDepotNearHQ() throws GameActionException {
 		MapLocation currentLoc = rc.getLocation();
 		int distanceFromHQ = currentLoc.distanceSquaredTo(rc.senseHQLocation());
-		if (Clock.getRoundNum() < 500) {
+		if (Clock.getRoundNum() < 1500) {
 			if (rand.nextInt(100) < 10) {
-				if (distanceFromHQ < 40 && distanceFromHQ > 20) {
+				if (distanceFromHQ < 60 && distanceFromHQ > 10) {
 					build(RobotType.SUPPLYDEPOT);
 				}
 			}
 		}
-	} // end of buildSupplyDepot method
+	} // end of buildSupplyDepotNearHQ method
+	
+	// checks to see how many nearby allies have zero supply
+	private static int checkSupplyLevels() throws GameActionException {
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(), rc.getType().sensorRadiusSquared, rc.getTeam());
+		int zeroSupplyCounter = 0;
+		for (RobotInfo robot : nearbyAllies) {
+			if (robot.supplyLevel == 0) {
+				zeroSupplyCounter++;
+			}
+		}
+		return zeroSupplyCounter;
+	} // end of checkSupplyLevels method
 	
 	// transfer supply to other robots that have less supply
 	private static void transferSupply() throws GameActionException {
@@ -380,6 +395,17 @@ public class RobotPlayer {
 		}
 	  }
 	} // end of transferSupply method
+	
+	private static void moveTowardDestination(MapLocation dest) throws GameActionException {
+		Direction toDest = rc.getLocation().directionTo(dest);
+		Direction[] directions = {toDest, toDest.rotateLeft(), toDest.rotateLeft().rotateLeft(), toDest.rotateRight(), toDest.rotateRight().rotateRight()};
+		for (Direction d : directions) {
+			if (rc.canMove(d) && rc.isCoreReady()) {
+				rc.move(d);
+				break;
+			}
+		}
+	} // end of moveTowardDestination method
 	
 	// this method isn't being used, but could be used for efficient direction changing
 	private static int directionNum(Direction d) {
