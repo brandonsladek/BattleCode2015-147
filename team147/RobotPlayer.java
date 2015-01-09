@@ -21,6 +21,7 @@ public class RobotPlayer {
 	public static void run(RobotController myRC) {
 
 		rc = myRC;
+		// initialize random number generator
 		rand = new Random(rc.getID());
 		currentDirection = randomDirection();
 		try {
