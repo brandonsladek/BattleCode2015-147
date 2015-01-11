@@ -1,6 +1,7 @@
 package team147;
 
 import java.util.Random;
+
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -17,14 +18,14 @@ public class RobotPlayer {
 	private static Direction currentDirection;
 	private static MapLocation enemyHQLoc;
 	private static MapLocation[] enemyTowers;
-	
+
 	public static void run(RobotController myRC) {
 
 		rc = myRC;
 		// initialize random number generator
 		rand = new Random(rc.getID());
 		currentDirection = randomDirection();
-		
+
 		try {
 			switch (rc.getType()) {
 			case AEROSPACELAB:
@@ -141,7 +142,7 @@ public class RobotPlayer {
 	private static void soldier() throws GameActionException {
 		while (true) {
 			attackEnemyZero();
-			moveTowardsHQ();
+			safeMoveTowardsHQ();
 			transferSupply();
 			rc.yield();
 		}
@@ -162,7 +163,7 @@ public class RobotPlayer {
 	private static void miner() throws GameActionException {
 		while (true) {
 			mine();
-			moveAround();
+			safeMoveAround();
 			attackEnemyZero();
 			transferSupply();
 			rc.yield();
@@ -217,10 +218,10 @@ public class RobotPlayer {
 	private static void beaver() throws GameActionException {
 		while (true) {
 			mine();
-			moveAround();
-			if(rand.nextInt(100) > 50) {
-			build(Clock.getRoundNum() > 350 ? RobotType.BARRACKS
-					: RobotType.MINERFACTORY);
+			safeMoveAround();
+			if (rand.nextInt(100) > 50) {
+				build(Clock.getRoundNum() > 350 ? RobotType.BARRACKS
+						: RobotType.MINERFACTORY);
 			} else {
 				buildSupplyDepotNearHQ();
 			}
@@ -232,7 +233,7 @@ public class RobotPlayer {
 
 	private static void basher() throws GameActionException {
 		while (true) {
-			moveTowardsHQ();
+			safeMoveTowardsHQ();
 			transferSupply();
 			rc.yield();
 		}
@@ -250,34 +251,36 @@ public class RobotPlayer {
 			rc.yield();
 		}
 	} // end of aerospacelab method
-	
-	// end of switch methods --------------------------------------------------------------
+
+	// end of switch methods
+	// --------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 	// below are all of the methods used above
-	
+
 	private static void attackEnemyTowerZero() throws GameActionException {
 		enemyTowers = rc.senseEnemyTowerLocations();
-		if(rc.getLocation().distanceSquaredTo(enemyTowers[0]) <= rc.getType().attackRadiusSquared) {
+		if (rc.getLocation().distanceSquaredTo(enemyTowers[0]) <= rc.getType().attackRadiusSquared) {
 			rc.attackLocation(enemyTowers[0]);
 		} else {
-		moveTowardDestination(enemyTowers[0]);
-	  }	
+			moveTowardDestination(enemyTowers[0]);
+		}
 	} // end of attackEnemyTowerZero method
-	
-	// this method returns a rally point halfway between our HQ and the attack location
+
+	// this method returns a rally point halfway between our HQ and the attack
+	// location
 	private static MapLocation getRallyPoint(MapLocation attackLocation) {
 		MapLocation ourHQ = rc.senseHQLocation();
-		int rallyX = (ourHQ.x + attackLocation.x)/2;
-		int rallyY = (ourHQ.y + attackLocation.y)/2;
+		int rallyX = (ourHQ.x + attackLocation.x) / 2;
+		int rallyY = (ourHQ.y + attackLocation.y) / 2;
 		MapLocation rallyPoint = new MapLocation(rallyX, rallyY);
 		return rallyPoint;
 	} // end of getRallyPoint method
-	
+
 	private static Direction randomDirection() {
 		return Direction.values()[rand.nextInt(8)];
 	} // end of randomDirection method
-	
+
 	private static void moveAround() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection)) {
@@ -291,10 +294,51 @@ public class RobotPlayer {
 				}
 			} else {
 				currentDirection = currentDirection.rotateRight();
+				moveAround();
 			}
 		}
 	} // end of moveAround method
-	
+
+	private static void safeMoveAround() throws GameActionException {
+		if (rc.isCoreReady()) {
+			if (rc.canMove(currentDirection) && directionSafeFromTowers()) {
+				if (rand.nextInt(100) > 10) {
+					rc.move(currentDirection);
+				} else {
+					currentDirection = currentDirection.rotateRight();
+					if (rc.canMove(currentDirection)
+							&& directionSafeFromTowers()) {
+						rc.move(currentDirection);
+					} else {
+						currentDirection = currentDirection.rotateRight();
+						safeMoveAround();
+					}
+				}
+			} else {
+				currentDirection = currentDirection.rotateRight();
+				safeMoveAround();
+			}
+		}
+	}
+
+	private static boolean directionSafeFromTowers() {
+		MapLocation target = rc.getLocation().add(currentDirection);
+		MapLocation towerLocs[] = rc.senseEnemyTowerLocations();
+
+		for (MapLocation towerLoc : towerLocs) {
+			if (target.distanceSquaredTo(towerLoc) <= RobotType.TOWER.attackRadiusSquared)
+				return false;
+		}
+		return true;
+	}
+
+	private static boolean safeFromHQ(MapLocation target) {
+		MapLocation hqLoc = rc.senseEnemyHQLocation();
+		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
+			return false;
+		return true;
+	}
+
 	private static void moveTowardsHQ() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection)) {
@@ -314,7 +358,32 @@ public class RobotPlayer {
 			}
 		}
 	} // end of moveTowardsHQ method
-	
+
+	private static void safeMoveTowardsHQ() throws GameActionException {
+		if (rc.isCoreReady()) {
+			if (rc.canMove(currentDirection)) {
+				if (rand.nextInt(100) > 10 && directionSafeFromTowers()) {
+					rc.move(currentDirection);
+				} else {
+					if (enemyHQLoc == null)
+						enemyHQLoc = rc.senseEnemyHQLocation();
+
+					currentDirection = rc.getLocation().directionTo(enemyHQLoc);
+					if (rc.canMove(currentDirection)
+							&& directionSafeFromTowers()) {
+						rc.move(currentDirection);
+					} else {
+						currentDirection = currentDirection.rotateRight();
+						safeMoveTowardsHQ();
+					}
+				}
+			} else {
+				currentDirection = currentDirection.rotateRight();
+				safeMoveTowardsHQ();
+			}
+		}
+	} // end of moveTowardsHQ method
+
 	private static void attackEnemyZero() throws GameActionException {
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -324,7 +393,7 @@ public class RobotPlayer {
 			}
 		}
 	} // end of attackEnemyZero method
-	
+
 	private static void mine() throws GameActionException {
 		int mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
 				: GameConstants.BEAVER_MINE_MAX);
@@ -333,7 +402,7 @@ public class RobotPlayer {
 			rc.mine();
 		}
 	} // end of mine method
-	
+
 	private static void spawnRobot(RobotType type) throws GameActionException {
 		if (rc.hasSpawnRequirements(type) && rc.isCoreReady()) {
 			for (Direction d : Direction.values()) {
@@ -344,7 +413,7 @@ public class RobotPlayer {
 			}
 		}
 	} // end of spawnRobot method
-	
+
 	private static void build(RobotType building) throws GameActionException {
 		if (rc.hasBuildRequirements(building) && rc.isCoreReady()) {
 			for (int i = 0; i < 8; i++) {
@@ -356,7 +425,7 @@ public class RobotPlayer {
 			}
 		}
 	} // end of build method
-	
+
 	private static void buildSupplyDepotNearHQ() throws GameActionException {
 		MapLocation currentLoc = rc.getLocation();
 		int distanceFromHQ = currentLoc.distanceSquaredTo(rc.senseHQLocation());
@@ -368,10 +437,11 @@ public class RobotPlayer {
 			}
 		}
 	} // end of buildSupplyDepotNearHQ method
-	
+
 	// checks to see how many nearby allies have zero supply
 	private static int checkSupplyLevels() throws GameActionException {
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(), rc.getType().sensorRadiusSquared, rc.getTeam());
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(),
+				rc.getType().sensorRadiusSquared, rc.getTeam());
 		int zeroSupplyCounter = 0;
 		for (RobotInfo robot : nearbyAllies) {
 			if (robot.supplyLevel == 0) {
@@ -380,33 +450,38 @@ public class RobotPlayer {
 		}
 		return zeroSupplyCounter;
 	} // end of checkSupplyLevels method
-	
+
 	// transfer supply to other robots that have less supply
 	private static void transferSupply() throws GameActionException {
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(), GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, rc.getTeam());
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getLocation(),
+				GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED, rc.getTeam());
 		double lowestSupply = rc.getSupplyLevel();
 		double transferAmount = 0;
 		MapLocation transferDestination = null;
 		if (nearbyAllies.length > 0) {
-		for (RobotInfo robot : nearbyAllies) {
-			if (robot.supplyLevel < lowestSupply) {
-				lowestSupply = robot.supplyLevel;
-				transferAmount = ((rc.getSupplyLevel() - robot.supplyLevel)/2);
-				transferDestination = robot.location;
+			for (RobotInfo robot : nearbyAllies) {
+				if (robot.supplyLevel < lowestSupply) {
+					lowestSupply = robot.supplyLevel;
+					transferAmount = ((rc.getSupplyLevel() - robot.supplyLevel) / 2);
+					transferDestination = robot.location;
+				}
 			}
-		  }
 		}
 		if (transferDestination != null) {
-			int transferDistance = transferDestination.distanceSquaredTo(rc.getLocation());
+			int transferDistance = transferDestination.distanceSquaredTo(rc
+					.getLocation());
 			if (transferDistance <= GameConstants.SUPPLY_TRANSFER_RADIUS_SQUARED) {
-				rc.transferSupplies((int)transferAmount, transferDestination);
+				rc.transferSupplies((int) transferAmount, transferDestination);
+			}
 		}
-	  }
 	} // end of transferSupply method
-	
-	private static void moveTowardDestination(MapLocation dest) throws GameActionException {
+
+	private static void moveTowardDestination(MapLocation dest)
+			throws GameActionException {
 		Direction toDest = rc.getLocation().directionTo(dest);
-		Direction[] directions = {toDest, toDest.rotateLeft(), toDest.rotateLeft().rotateLeft(), toDest.rotateRight(), toDest.rotateRight().rotateRight()};
+		Direction[] directions = { toDest, toDest.rotateLeft(),
+				toDest.rotateLeft().rotateLeft(), toDest.rotateRight(),
+				toDest.rotateRight().rotateRight() };
 		for (Direction d : directions) {
 			if (rc.canMove(d) && rc.isCoreReady()) {
 				rc.move(d);
@@ -414,13 +489,14 @@ public class RobotPlayer {
 			}
 		}
 	} // end of moveTowardDestination method
-	
-	// this method isn't being used, but could be used for efficient direction changing
+
+	// this method isn't being used, but could be used for efficient direction
+	// changing
 	private static int directionNum(Direction d) {
-		switch(d) {
+		switch (d) {
 		case NORTH:
 			return 0;
-		case NORTH_WEST: 
+		case NORTH_WEST:
 			return 1;
 		case WEST:
 			return 2;
