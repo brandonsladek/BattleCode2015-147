@@ -175,7 +175,7 @@ public class RobotPlayer {
 		while (true) {
 			attackEnemyZero();
 			moveTowardsHQ();
-			//transferSupply();
+			transferSupply();
 			rc.yield();
 		}
 
