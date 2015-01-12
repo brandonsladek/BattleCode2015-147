@@ -157,7 +157,7 @@ public class RobotPlayer {
 	private static void minerfactory() throws GameActionException {
 		int numMinersSpawned = 0;
 		while (true) {
-			if (numMinersSpawned++ < 10 || rand.nextDouble() < .03)
+			if (numMinersSpawned++ < 10 || rand.nextDouble() < .015)
 				spawnRobot(RobotType.MINER);
 			rc.yield();
 		}
@@ -183,7 +183,7 @@ public class RobotPlayer {
 		int numBeaversSpawned = 0;
 		while (true) {
 			attackEnemyZero();
-			if (numBeaversSpawned++ < 10 || rand.nextDouble() < .02)
+			if (numBeaversSpawned++ < 10 || rand.nextDouble() < .001)
 				;
 			spawnRobot(RobotType.BEAVER);
 			transferSupply();
@@ -228,7 +228,7 @@ public class RobotPlayer {
 	private static void beaver() throws GameActionException {
 		while (true) {
 
-			switch (rand.nextInt(9)) {
+			switch (rand.nextInt(8)) {
 			case 0:
 			case 1:
 			case 2:
@@ -238,11 +238,10 @@ public class RobotPlayer {
 				break;
 			case 4:
 			case 5:
-				build(getNeededBuilding());
-				break;
-			case 7:
-			case 8:
-				buildSupplyDepotNearHQ();
+				if (rand.nextDouble() > .2)
+					build(getNeededBuilding());
+				else
+					buildSupplyDepotNearHQ();
 			default:
 				mine();
 				safeMoveAround();
