@@ -155,8 +155,11 @@ public class RobotPlayer {
 	} // end of missile method
 
 	private static void minerfactory() throws GameActionException {
+		int numMinersSpawned = 0;
 		while (true) {
-			spawnRobot(RobotType.MINER);
+			if (numMinersSpawned++ < 10 || rand.nextDouble() < .03)
+				spawnRobot(RobotType.MINER);
+			rc.yield();
 		}
 	} // end of minerfactory method
 
@@ -177,16 +180,20 @@ public class RobotPlayer {
 	} // end of launcher method
 
 	private static void hq() throws GameActionException {
+		int numBeaversSpawned = 0;
 		while (true) {
 			attackEnemyZero();
+			if (numBeaversSpawned++ < 10 || rand.nextDouble() < .02)
+				;
 			spawnRobot(RobotType.BEAVER);
 			transferSupply();
 			rc.yield();
 		}
 	} // end of hq method
 
-	private static void helipad() {
+	private static void helipad() throws GameActionException {
 		while (true) {
+			spawnRobot(RobotType.DRONE);
 			rc.yield();
 		}
 	} // end of helipad
@@ -197,8 +204,11 @@ public class RobotPlayer {
 		}
 	} // end of handwashstation method
 
-	private static void drone() {
+	private static void drone() throws GameActionException {
 		while (true) {
+			attackEnemyZero();
+			safeMoveTowardsHQ();
+			transferSupply();
 			rc.yield();
 		}
 	} // end of drone method
@@ -217,14 +227,28 @@ public class RobotPlayer {
 
 	private static void beaver() throws GameActionException {
 		while (true) {
-			mine();
-			safeMoveAround();
-			if (rand.nextInt(100) > 50) {
-				build(Clock.getRoundNum() > 350 ? RobotType.BARRACKS
-						: RobotType.MINERFACTORY);
-			} else {
+
+			switch (rand.nextInt(9)) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				mine();
+				safeMoveAround();
+				break;
+			case 4:
+			case 5:
+				build(getNeededBuilding());
+				break;
+			case 7:
+			case 8:
 				buildSupplyDepotNearHQ();
+			default:
+				mine();
+				safeMoveAround();
+				break;
 			}
+
 			attackEnemyZero();
 			transferSupply();
 			rc.yield();
@@ -241,8 +265,7 @@ public class RobotPlayer {
 
 	private static void barracks() throws GameActionException {
 		while (true) {
-			spawnRobot(rand.nextDouble() > .5 ? RobotType.BASHER
-					: RobotType.SOLDIER);
+			spawnRobot(RobotType.SOLDIER);
 		}
 	} // end of barracks method
 
@@ -321,6 +344,37 @@ public class RobotPlayer {
 		}
 	}
 
+	private static RobotType getNeededBuilding() {
+		boolean spawnMinerFactory = rand.nextInt(Clock.getRoundNum()) < 200;
+
+		if (spawnMinerFactory)
+			return RobotType.MINERFACTORY;
+		else {
+			boolean canSpawnTankFactory = rc
+					.hasSpawnRequirements(RobotType.TANKFACTORY);
+			boolean canSpawnAerospaceLab = rc
+					.hasSpawnRequirements(RobotType.AEROSPACELAB);
+
+			RobotType needed = rand.nextInt(3) > 1 ? RobotType.BARRACKS
+					: RobotType.HELIPAD;
+
+			switch (needed) {
+			case BARRACKS:
+				if (canSpawnTankFactory)
+					return RobotType.TANKFACTORY;
+				else
+					return RobotType.BARRACKS;
+			case HELIPAD:
+				if (canSpawnAerospaceLab)
+					return RobotType.AEROSPACELAB;
+				else
+					return RobotType.HELIPAD;
+			default:
+				return null;
+			}
+		}
+	}
+
 	private static boolean directionSafeFromTowers() {
 		MapLocation target = rc.getLocation().add(currentDirection);
 		MapLocation towerLocs[] = rc.senseEnemyTowerLocations();
@@ -332,7 +386,8 @@ public class RobotPlayer {
 		return true;
 	}
 
-	private static boolean safeFromHQ(MapLocation target) {
+	private static boolean directionSafeFromHQ() {
+		MapLocation target = rc.getLocation().add(currentDirection);
 		MapLocation hqLoc = rc.senseEnemyHQLocation();
 		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
 			return false;
@@ -362,7 +417,8 @@ public class RobotPlayer {
 	private static void safeMoveTowardsHQ() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection)) {
-				if (rand.nextInt(100) > 10 && directionSafeFromTowers()) {
+				if (rand.nextInt(100) > 10 && directionSafeFromTowers()
+						&& directionSafeFromHQ()) {
 					rc.move(currentDirection);
 				} else {
 					if (enemyHQLoc == null)
