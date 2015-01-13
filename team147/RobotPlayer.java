@@ -203,7 +203,7 @@ public class RobotPlayer {
 	private static void helipad() throws GameActionException {
 		messaging.incrementNumHelipadsSpawned();
 		while (true) {
-			spawnRobot(RobotType.DRONE);
+			// spawnRobot(RobotType.DRONE);
 			rc.yield();
 		}
 	} // end of helipad
@@ -239,12 +239,8 @@ public class RobotPlayer {
 	private static void beaver() throws GameActionException {
 		while (true) {
 
-			switch (rand.nextInt(8)) {
+			switch (rand.nextInt(6)) {
 			case 0:
-				if (canBuildLauncher()) {
-					spawnRobot(RobotType.LAUNCHER);
-					System.out.println("built launcher...");
-				}
 			case 1:
 			case 2:
 			case 3:
@@ -283,8 +279,9 @@ public class RobotPlayer {
 	} // end of barracks method
 
 	private static void aerospacelab() throws GameActionException {
+		messaging.incrementNumAerospacelabsSpawned();
 		while (true) {
-			messaging.incrementNumAerospacelabsSpawned();
+			spawnRobot(RobotType.LAUNCHER);
 			rc.yield();
 		}
 	} // end of aerospacelab method
