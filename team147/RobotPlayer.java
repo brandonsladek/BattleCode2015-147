@@ -153,8 +153,9 @@ public class RobotPlayer {
 		}
 	} // end of soldier method
 
-	private static void missile() {
+	private static void missile() throws GameActionException {
 		while (true) {
+			moveTowardsHQ();
 			rc.yield();
 		}
 	} // end of missile method
@@ -182,7 +183,7 @@ public class RobotPlayer {
 
 	private static void launcher() throws GameActionException {
 		while (true) {
-			safeMoveTowardsHQ();
+			safeMoveTowardDestination(messaging.getRallyPoint());
 			checkAndLaunchMissile();
 			rc.yield();
 		}
@@ -203,7 +204,7 @@ public class RobotPlayer {
 	private static void helipad() throws GameActionException {
 		messaging.incrementNumHelipadsSpawned();
 		while (true) {
-			// spawnRobot(RobotType.DRONE);
+			spawnRobot(RobotType.DRONE);
 			rc.yield();
 		}
 	} // end of helipad
@@ -217,8 +218,14 @@ public class RobotPlayer {
 	private static void drone() throws GameActionException {
 		while (true) {
 			attackLeastHealthyEnemy();
-			moveTowardDestination(messaging.getRallyPoint());
-			safeMoveTowardsHQ();
+			if (Clock.getRoundNum() < 1500)
+				followEconUnit();
+			else if (Clock.getRoundNum() < 1600)
+				safeMoveTowardDestination(messaging.getRallyPoint());
+			else if (Clock.getRoundNum() < 1750)
+				safeMoveTowardDestination(getClosestTowerLocation());
+			else
+				moveTowardDestination(getClosestTowerLocation());
 			transferSupply();
 			rc.yield();
 		}
@@ -292,11 +299,6 @@ public class RobotPlayer {
 	// ------------------------------------------------------------------------------------
 	// below are all of the methods used above
 
-	private static boolean canBuildLauncher() {
-		boolean canBuildLauncher = rc.hasBuildRequirements(RobotType.LAUNCHER);
-		return canBuildLauncher;
-	}
-
 	private static void checkAndLaunchMissile() throws GameActionException {
 		enemyTowers = rc.senseEnemyTowerLocations();
 		int distanceFromNearestTower = rc.getLocation().distanceSquaredTo(
@@ -354,6 +356,26 @@ public class RobotPlayer {
 		}
 	} // end of moveAround method
 
+	private static void followEconUnit() throws GameActionException {
+		RobotInfo allies[] = rc.senseNearbyRobots(
+				rc.getType().attackRadiusSquared, rc.getTeam());
+		RobotInfo allyToFollow = null;
+
+		for (RobotInfo ally : allies) {
+			if (ally.type == RobotType.MINER || ally.type == RobotType.BEAVER) {
+				allyToFollow = ally;
+				break;
+			}
+		}
+
+		if (allyToFollow != null)
+			safeMoveTowardDestination(allyToFollow.location.add(
+					allyToFollow.location.directionTo(getEnemyHQLoc()),
+					(int) ((double) rc.getType().attackRadiusSquared / 2 * rand
+							.nextDouble())));
+
+	}
+
 	private static void safeMoveAround() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection) && directionSafeFromTowers()) {
@@ -380,7 +402,7 @@ public class RobotPlayer {
 		if (messaging.getNumMinerfactoriesSpawned() < 2)
 			return RobotType.MINERFACTORY;
 
-		else if (messaging.getNumHelipadsSpawned() < 1)
+		else if (messaging.getNumHelipadsSpawned() < 4)
 			return RobotType.HELIPAD;
 
 		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 100)
@@ -401,8 +423,27 @@ public class RobotPlayer {
 		return true;
 	}
 
+	private static boolean directionSafeFromTowers(Direction facing) {
+		MapLocation target = rc.getLocation().add(facing);
+		MapLocation towerLocs[] = rc.senseEnemyTowerLocations();
+
+		for (MapLocation towerLoc : towerLocs) {
+			if (target.distanceSquaredTo(towerLoc) <= RobotType.TOWER.attackRadiusSquared)
+				return false;
+		}
+		return true;
+	}
+
 	private static boolean directionSafeFromHQ() {
 		MapLocation target = rc.getLocation().add(currentDirection);
+		MapLocation hqLoc = getEnemyHQLoc();
+		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
+			return false;
+		return true;
+	}
+
+	private static boolean directionSafeFromHQ(Direction d) {
+		MapLocation target = rc.getLocation().add(d);
 		MapLocation hqLoc = getEnemyHQLoc();
 		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
 			return false;
@@ -486,6 +527,26 @@ public class RobotPlayer {
 			}
 		}
 	} // end of attackLeastHealthyEnemy method
+
+	private static MapLocation getClosestTowerLocation() {
+		MapLocation enemyTowers[] = rc.senseEnemyTowerLocations();
+
+		int closestDistance = Integer.MAX_VALUE;
+		MapLocation closestTower = null;
+		for (MapLocation tower : enemyTowers) {
+			int distanceSquaredTo = tower.distanceSquaredTo(rc
+					.senseHQLocation());
+			if (distanceSquaredTo < closestDistance) {
+				closestTower = tower;
+				closestDistance = distanceSquaredTo;
+			}
+		}
+
+		if (closestTower != null)
+			return closestTower;
+		else
+			return getEnemyHQLoc();
+	}
 
 	private static void mine() throws GameActionException {
 		int mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
@@ -579,6 +640,23 @@ public class RobotPlayer {
 			if (rc.canMove(d) && rc.isCoreReady()) {
 				rc.move(d);
 				break;
+			}
+		}
+	} // end of moveTowardDestination method
+
+	private static void safeMoveTowardDestination(MapLocation dest)
+			throws GameActionException {
+		if (rc.isCoreReady()) {
+			Direction toDest = rc.getLocation().directionTo(dest);
+			Direction[] directions = { toDest, toDest.rotateLeft(),
+					toDest.rotateLeft().rotateLeft(), toDest.rotateRight(),
+					toDest.rotateRight().rotateRight() };
+			for (Direction d : directions) {
+				if (rc.canMove(d) && directionSafeFromTowers(d)
+						&& directionSafeFromHQ(d)) {
+					rc.move(d);
+					break;
+				}
 			}
 		}
 	} // end of moveTowardDestination method
