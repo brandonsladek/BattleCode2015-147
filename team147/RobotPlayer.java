@@ -115,7 +115,8 @@ public class RobotPlayer {
 
 	private static void tower() throws GameActionException {
 		while (true) {
-			attackEnemyZero();
+			// attackEnemyZero();
+			attackLeastHealthyEnemy();
 			transferSupply();
 			rc.yield();
 		}
@@ -144,7 +145,8 @@ public class RobotPlayer {
 
 	private static void soldier() throws GameActionException {
 		while (true) {
-			attackEnemyZero();
+			// attackEnemyZero();
+			attackLeastHealthyEnemy();
 			safeMoveTowardsHQ();
 			transferSupply();
 			rc.yield();
@@ -171,14 +173,17 @@ public class RobotPlayer {
 		while (true) {
 			mine();
 			safeMoveAround();
-			attackEnemyZero();
+			// attackEnemyZero();
+			attackLeastHealthyEnemy();
 			transferSupply();
 			rc.yield();
 		}
 	} // end of miner method
 
-	private static void launcher() {
+	private static void launcher() throws GameActionException {
 		while (true) {
+			safeMoveTowardsHQ();
+			checkAndLaunchMissile();
 			rc.yield();
 		}
 	} // end of launcher method
@@ -187,7 +192,7 @@ public class RobotPlayer {
 		int numBeaversSpawned = 0;
 		getAndSetRallyPoint(getEnemyHQLoc());
 		while (true) {
-			attackEnemyZero();
+			attackLeastHealthyEnemy();
 			if (numBeaversSpawned++ < 10 || rand.nextDouble() < .01)
 				spawnRobot(RobotType.BEAVER);
 			transferSupply();
@@ -211,8 +216,9 @@ public class RobotPlayer {
 
 	private static void drone() throws GameActionException {
 		while (true) {
-			attackEnemyZero();
+			attackLeastHealthyEnemy();
 			moveTowardDestination(messaging.getRallyPoint());
+			safeMoveTowardsHQ();
 			transferSupply();
 			rc.yield();
 		}
@@ -235,6 +241,10 @@ public class RobotPlayer {
 
 			switch (rand.nextInt(8)) {
 			case 0:
+				if (canBuildLauncher()) {
+					spawnRobot(RobotType.LAUNCHER);
+					System.out.println("built launcher...");
+				}
 			case 1:
 			case 2:
 			case 3:
@@ -250,7 +260,8 @@ public class RobotPlayer {
 				break;
 			}
 
-			attackEnemyZero();
+			// attackEnemyZero();
+			attackLeastHealthyEnemy();
 			transferSupply();
 			rc.yield();
 		}
@@ -283,6 +294,23 @@ public class RobotPlayer {
 	// ------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------
 	// below are all of the methods used above
+
+	private static boolean canBuildLauncher() {
+		boolean canBuildLauncher = rc.hasBuildRequirements(RobotType.LAUNCHER);
+		return canBuildLauncher;
+	}
+
+	private static void checkAndLaunchMissile() throws GameActionException {
+		enemyTowers = rc.senseEnemyTowerLocations();
+		int distanceFromNearestTower = rc.getLocation().distanceSquaredTo(
+				enemyTowers[0]);
+		Direction dir = rc.getLocation().directionTo(enemyTowers[0]);
+		if (distanceFromNearestTower < RobotType.TOWER.attackRadiusSquared + 2) {
+			if (rc.canLaunch(dir)) {
+				rc.launchMissile(dir);
+			}
+		}
+	} // end of checkAndLaunchMissile method
 
 	private static void attackEnemyTowerZero() throws GameActionException {
 		enemyTowers = rc.senseEnemyTowerLocations();
@@ -422,16 +450,18 @@ public class RobotPlayer {
 						rc.move(currentDirection);
 					} else {
 						currentDirection = currentDirection.rotateRight();
-						safeMoveTowardsHQ();
+						// safeMoveTowardsHQ();
 					}
 				}
 			} else {
 				currentDirection = currentDirection.rotateRight();
-				safeMoveTowardsHQ();
+				// safeMoveTowardsHQ();
 			}
 		}
 	} // end of moveTowardsHQ method
 
+	// we probably shouldn't use this method anymore since it makes more sense
+	// to attack the least healthy enemy
 	private static void attackEnemyZero() throws GameActionException {
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -441,6 +471,24 @@ public class RobotPlayer {
 			}
 		}
 	} // end of attackEnemyZero method
+
+	private static void attackLeastHealthyEnemy() throws GameActionException {
+		RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getLocation(),
+				rc.getType().attackRadiusSquared, rc.getTeam().opponent());
+		double leastHealth = 999999;
+		MapLocation loc = rc.getLocation().add(1, 1);
+		for (RobotInfo robot : nearbyEnemies) {
+			if (robot.health < leastHealth) {
+				leastHealth = robot.health;
+				loc = robot.location;
+			}
+		}
+		if (nearbyEnemies.length >= 1) {
+			if (rc.isCoreReady() && rc.isWeaponReady()) {
+				rc.attackLocation(loc);
+			}
+		}
+	} // end of attackLeastHealthyEnemy method
 
 	private static void mine() throws GameActionException {
 		int mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
