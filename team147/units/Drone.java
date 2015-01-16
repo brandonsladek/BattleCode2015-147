@@ -1,5 +1,6 @@
-package team147;
+package team147.units;
 
+import team147.BaseRobot;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -23,20 +24,32 @@ public class Drone extends BaseRobot {
 	}
 
 	@Override
-	public void defaultMove() {
+	public void defaultPanicAction() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void defaultAttack() {
+	public void defaultAttackAction() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void sendSpawnMessages() {
+	public void defaultDefendAction() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void defaultEconAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultExploreAction() {
+		// TODO Auto-generated method stub
+		
 	}
 }

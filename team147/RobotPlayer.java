@@ -1,5 +1,26 @@
 package team147;
 
+import team147.buildings.Aerospacelab;
+import team147.buildings.Barracks;
+import team147.buildings.Handwashstation;
+import team147.buildings.Helipad;
+import team147.buildings.Hq;
+import team147.buildings.Minerfactory;
+import team147.buildings.Supplydepot;
+import team147.buildings.Tankfactory;
+import team147.buildings.Technologyinstitute;
+import team147.buildings.Tower;
+import team147.buildings.Trainingfield;
+import team147.units.Basher;
+import team147.units.Beaver;
+import team147.units.Commander;
+import team147.units.Computer;
+import team147.units.Drone;
+import team147.units.Launcher;
+import team147.units.Miner;
+import team147.units.Missile;
+import team147.units.Soldier;
+import team147.units.Tank;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 

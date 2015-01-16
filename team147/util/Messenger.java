@@ -1,4 +1,4 @@
-package team147;
+package team147.util;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

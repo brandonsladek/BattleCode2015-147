@@ -1,5 +1,6 @@
-package team147;
+package team147.buildings;
 
+import team147.BaseRobot;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
@@ -15,20 +16,32 @@ public class Helipad extends BaseRobot {
 	}
 
 	@Override
-	public void defaultMove() {
+	public void defaultPanicAction() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void defaultAttack() {
+	public void defaultAttackAction() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void sendSpawnMessages() {
+	public void defaultDefendAction() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void defaultEconAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultExploreAction() {
+		// TODO Auto-generated method stub
+		
 	}
 }

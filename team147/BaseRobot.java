@@ -2,6 +2,7 @@ package team147;
 
 import java.util.Random;
 
+import team147.util.Messenger;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -19,7 +20,7 @@ public abstract class BaseRobot {
 	public Direction currentDirection;
 	public MapLocation enemyHQLoc, hQLoc;
 	public Team enemyTeam, myTeam;
-	public int attackRadiusSquared;
+	public int attackRadiusSquared, sensorRadiusSqured;
 
 	public BaseRobot(RobotController rc) {
 		this.rc = rc;
@@ -32,6 +33,7 @@ public abstract class BaseRobot {
 		enemyTeam = myTeam.opponent();
 
 		attackRadiusSquared = rc.getType().attackRadiusSquared;
+		sensorRadiusSqured = rc.getType().sensorRadiusSquared;
 	}
 
 	public void attackEnemyTowerZero() throws GameActionException {
@@ -390,11 +392,15 @@ public abstract class BaseRobot {
 		}
 	} // end of moveTowardDestination method
 
-	public abstract void defaultMove();
+	public abstract void defaultPanicAction();
 
-	public abstract void defaultAttack();
+	public abstract void defaultAttackAction();
 
-	public abstract void sendSpawnMessages();
+	public abstract void defaultDefendAction();
+
+	public abstract void defaultEconAction();
+
+	public abstract void defaultExploreAction();
 
 	// this method isn't being used, but could be used for efficient direction
 	// changing
