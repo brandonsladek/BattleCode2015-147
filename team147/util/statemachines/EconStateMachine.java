@@ -29,11 +29,6 @@ public class EconStateMachine extends StateMachine {
 		return null;
 	}
 
-	public void performNextMove() {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void sendStateMessages() {
 		// TODO Auto-generated method stub
 
