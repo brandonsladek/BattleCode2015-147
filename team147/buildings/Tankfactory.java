@@ -42,4 +42,22 @@ public class Tankfactory extends BaseRobot {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void defaultTurnSetup() throws GameActionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultSpawnSetup() throws GameActionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultTurnEndAction() throws GameActionException {
+		// TODO Auto-generated method stub
+		
+	}
 }

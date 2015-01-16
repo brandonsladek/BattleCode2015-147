@@ -140,10 +140,10 @@ public abstract class BaseRobot {
 	}
 
 	public RobotType getNeededBuilding() throws GameActionException {
-		if (messaging.getNumMinerfactoriesSpawned() < 2)
+		if (messaging.getNumMinerfactoriesSpawned() < 1)
 			return RobotType.MINERFACTORY;
 
-		else if (messaging.getNumHelipadsSpawned() < 4)
+		else if (messaging.getNumHelipadsSpawned() < 2)
 			return RobotType.HELIPAD;
 
 		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 100)
@@ -151,6 +151,15 @@ public abstract class BaseRobot {
 
 		else
 			return RobotType.AEROSPACELAB;
+	}
+
+	public void moveToSafety() throws GameActionException {
+		Direction safeDirections = getSafeDirections();
+	}
+
+	private Direction getSafeDirections() {
+
+		return null;
 	}
 
 	public boolean directionSafeFromTowers() {
@@ -392,15 +401,21 @@ public abstract class BaseRobot {
 		}
 	} // end of moveTowardDestination method
 
-	public abstract void defaultPanicAction();
+	public abstract void defaultPanicAction() throws GameActionException;
 
-	public abstract void defaultAttackAction();
+	public abstract void defaultAttackAction() throws GameActionException;
 
-	public abstract void defaultDefendAction();
+	public abstract void defaultDefendAction() throws GameActionException;
 
-	public abstract void defaultEconAction();
+	public abstract void defaultEconAction() throws GameActionException;
 
-	public abstract void defaultExploreAction();
+	public abstract void defaultExploreAction() throws GameActionException;
+
+	public abstract void defaultTurnSetup() throws GameActionException;
+
+	public abstract void defaultSpawnSetup() throws GameActionException;
+
+	public abstract void defaultTurnEndAction() throws GameActionException;
 
 	// this method isn't being used, but could be used for efficient direction
 	// changing

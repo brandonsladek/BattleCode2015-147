@@ -1,6 +1,7 @@
 package team147.buildings;
 
 import team147.BaseRobot;
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Handwashstation extends BaseRobot {
@@ -37,6 +38,24 @@ public class Handwashstation extends BaseRobot {
 
 	@Override
 	public void defaultExploreAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultTurnSetup() throws GameActionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultSpawnSetup() throws GameActionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void defaultTurnEndAction() throws GameActionException {
 		// TODO Auto-generated method stub
 		
 	}

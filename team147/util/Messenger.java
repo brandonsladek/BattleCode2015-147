@@ -30,6 +30,8 @@ public class Messenger {
 
 		NUM_SUPPLYDEPOTS_SPAWNED(18),
 
+		NUM_BEAVERS_SPAWNED(19),
+
 		// Example of a Map Location
 		RALLYPOINT_1X(5), RALLYPOINT_1Y(6);
 
@@ -217,6 +219,14 @@ public class Messenger {
 			throws GameActionException {
 		setRallyPoint1x(rallyPoint.x);
 		setRallyPoint1y(rallyPoint.y);
+	}
+
+	public void setNumBeaversSpawned(int numBeavers) throws GameActionException {
+		rc.broadcast(ChannelNumber.NUM_BEAVERS_SPAWNED.getValue(), numBeavers);
+	}
+
+	public int getNumBeaversSpawned() throws GameActionException {
+		return rc.readBroadcast(ChannelNumber.NUM_BEAVERS_SPAWNED.getValue());
 	}
 
 }

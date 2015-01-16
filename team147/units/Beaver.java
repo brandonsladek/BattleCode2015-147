@@ -10,8 +10,12 @@ public class Beaver extends BaseRobot {
 
 	public Beaver(RobotController myRC) throws GameActionException {
 		super(myRC);
+		stateMachine = new EconStateMachine(this);
+		defaultSpawnSetup();
+
 		while (true) {
 			stateMachine.updateState();
+			defaultTurnSetup();
 			switch (stateMachine.currentState) {
 			case ATTACK:
 				defaultAttackAction();
@@ -31,6 +35,7 @@ public class Beaver extends BaseRobot {
 			default:
 				break;
 			}
+			defaultTurnEndAction();
 			stateMachine.sendStateMessages();
 		}
 
@@ -79,14 +84,30 @@ public class Beaver extends BaseRobot {
 	}
 
 	@Override
-	public void defaultEconAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultEconAction() throws GameActionException {
+		build(getNeededBuilding());
+		transferSupply();
 	}
 
 	@Override
 	public void defaultExploreAction() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void defaultTurnSetup() throws GameActionException {
+		messaging.setNumBeaversSpawned(1);
+	}
+
+	@Override
+	public void defaultSpawnSetup() throws GameActionException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void defaultTurnEndAction() throws GameActionException {
+		rc.yield();
 	}
 }

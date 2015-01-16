@@ -6,16 +6,16 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
 public class Hq extends BaseRobot {
+	int numBeaversAlive;
+
 	public Hq(RobotController myRC) throws GameActionException {
 		super(myRC);
-		int numBeaversSpawned = 0;
-		messaging.setRallyPoint(getDefaultRallyPoint(enemyHQLoc));
+		defaultSpawnSetup();
 		while (true) {
+			defaultTurnSetup();
 			attackLeastHealthyEnemy();
-			if (numBeaversSpawned++ < 5 || rand.nextDouble() < .01)
-				spawnRobot(RobotType.BEAVER);
 			transferSupply();
-			rc.yield();
+			defaultTurnEndAction();
 		}
 	}
 
@@ -39,13 +39,31 @@ public class Hq extends BaseRobot {
 
 	@Override
 	public void defaultEconAction() {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultExploreAction() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void defaultTurnSetup() throws GameActionException {
+		numBeaversAlive = messaging.getNumBeaversSpawned();
+		messaging.setNumBeaversSpawned(0);
+		if (numBeaversAlive == 0)
+			spawnRobot(RobotType.BEAVER);
+	}
+
+	@Override
+	public void defaultSpawnSetup() throws GameActionException {
+		messaging.setRallyPoint(getDefaultRallyPoint(enemyHQLoc));
+	}
+
+	@Override
+	public void defaultTurnEndAction() throws GameActionException {
+		// TODO Auto-generated method stub
+		rc.yield();
 	}
 }

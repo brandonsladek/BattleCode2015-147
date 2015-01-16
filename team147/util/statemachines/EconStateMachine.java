@@ -14,7 +14,7 @@ public class EconStateMachine extends StateMachine {
 	}
 
 	public State updateState() {
-		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSqured,
+		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,
 				br.enemyTeam);
 		MapLocation currentLoc = br.rc.getLocation();
 
@@ -26,7 +26,7 @@ public class EconStateMachine extends StateMachine {
 			}
 		}
 
-		return null;
+		return State.ECON;
 	}
 
 	public void sendStateMessages() {
