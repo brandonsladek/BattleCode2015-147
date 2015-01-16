@@ -6,8 +6,7 @@ import battlecode.common.RobotController;
 
 public class Messenger {
 
-	private static RobotController rc;
-	private static MapLocation rallyPoint;
+	private RobotController rc;
 
 	public Messenger(RobotController rc) {
 		this.rc = rc;
@@ -212,6 +211,12 @@ public class Messenger {
 
 	public MapLocation getRallyPoint() throws GameActionException {
 		return new MapLocation(getRallyPoint1x(), getRallyPoint1y());
+	}
+
+	public void setRallyPoint(MapLocation rallyPoint)
+			throws GameActionException {
+		setRallyPoint1x(rallyPoint.x);
+		setRallyPoint1y(rallyPoint.y);
 	}
 
 }

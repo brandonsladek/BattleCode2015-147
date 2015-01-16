@@ -73,8 +73,8 @@ public class RobotPlayer {
 			default:
 				break;
 			}
-		} catch (GameActionException ge) {
-			ge.printStackTrace();
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
 	}
 }

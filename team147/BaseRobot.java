@@ -10,19 +10,28 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 
 public abstract class BaseRobot {
 	public RobotController rc;
 	public Messenger messaging;
 	public Random rand;
 	public Direction currentDirection;
-	public MapLocation enemyHQLoc;
+	public MapLocation enemyHQLoc, hQLoc;
+	public Team enemyTeam, myTeam;
+	public int attackRadiusSquared;
 
 	public BaseRobot(RobotController rc) {
 		this.rc = rc;
 		rand = new Random(rc.getID());
 		messaging = new Messenger(rc);
 		currentDirection = randomDirection();
+		enemyHQLoc = rc.senseEnemyHQLocation();
+		hQLoc = rc.senseHQLocation();
+		myTeam = rc.getTeam();
+		enemyTeam = myTeam.opponent();
+
+		attackRadiusSquared = rc.getType().attackRadiusSquared;
 	}
 
 	public void attackEnemyTowerZero() throws GameActionException {
@@ -34,18 +43,10 @@ public abstract class BaseRobot {
 		}
 	}
 
-	public MapLocation getAndSetRallyPoint(MapLocation attackLocation)
+	public MapLocation getDefaultRallyPoint(MapLocation attackLocation)
 			throws GameActionException {
-		MapLocation ourHQ = rc.senseHQLocation();
-
-		System.out.println("Attack Location x: " + attackLocation.x);
-		System.out.println("Attack Location y: " + attackLocation.y);
-
-		MapLocation rallyPoint = ourHQ.add(ourHQ.directionTo(attackLocation),
-				(int) (Math.sqrt(ourHQ.distanceSquaredTo(attackLocation)) / 4));
-
-		messaging.setRallyPoint1x(rallyPoint.x);
-		messaging.setRallyPoint1y(rallyPoint.y);
+		MapLocation rallyPoint = hQLoc.add(hQLoc.directionTo(attackLocation),
+				(int) (Math.sqrt(hQLoc.distanceSquaredTo(attackLocation)) / 4));
 		return rallyPoint;
 	} // end of getRallyPoint method
 
@@ -85,7 +86,7 @@ public abstract class BaseRobot {
 
 		if (allyToFollow != null)
 			safeMoveTowardDestination(allyToFollow.location.add(
-					allyToFollow.location.directionTo(getEnemyHQLoc()),
+					allyToFollow.location.directionTo(enemyHQLoc),
 					(int) ((double) rc.getType().attackRadiusSquared / 2 * rand
 							.nextDouble())));
 	}
@@ -174,16 +175,14 @@ public abstract class BaseRobot {
 
 	public boolean directionSafeFromHQ() {
 		MapLocation target = rc.getLocation().add(currentDirection);
-		MapLocation hqLoc = getEnemyHQLoc();
-		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
+		if (target.distanceSquaredTo(enemyHQLoc) <= RobotType.HQ.attackRadiusSquared)
 			return false;
 		return true;
 	}
 
 	public boolean directionSafeFromHQ(Direction d) {
 		MapLocation target = rc.getLocation().add(d);
-		MapLocation hqLoc = getEnemyHQLoc();
-		if (target.distanceSquaredTo(hqLoc) <= RobotType.HQ.attackRadiusSquared)
+		if (target.distanceSquaredTo(enemyHQLoc) <= RobotType.HQ.attackRadiusSquared)
 			return false;
 		return true;
 	}
@@ -194,8 +193,7 @@ public abstract class BaseRobot {
 				if (rand.nextInt(100) > 10) {
 					rc.move(currentDirection);
 				} else {
-					currentDirection = rc.getLocation().directionTo(
-							getEnemyHQLoc());
+					currentDirection = rc.getLocation().directionTo(enemyHQLoc);
 					if (rc.canMove(currentDirection)) {
 						rc.move(currentDirection);
 					}
@@ -206,12 +204,6 @@ public abstract class BaseRobot {
 		}
 	} // end of moveTowardsHQ method
 
-	public MapLocation getEnemyHQLoc() {
-		if (enemyHQLoc == null)
-			enemyHQLoc = rc.senseEnemyHQLocation();
-		return enemyHQLoc;
-	}
-
 	public void safeMoveTowardsHQ() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection)) {
@@ -219,8 +211,7 @@ public abstract class BaseRobot {
 						&& directionSafeFromHQ()) {
 					rc.move(currentDirection);
 				} else {
-					currentDirection = rc.getLocation().directionTo(
-							getEnemyHQLoc());
+					currentDirection = rc.getLocation().directionTo(enemyHQLoc);
 					if (rc.canMove(currentDirection)
 							&& directionSafeFromTowers()) {
 						rc.move(currentDirection);
@@ -283,7 +274,7 @@ public abstract class BaseRobot {
 		if (closestTower != null)
 			return closestTower;
 		else
-			return getEnemyHQLoc();
+			return enemyHQLoc;
 	}
 
 	public void mine() throws GameActionException {

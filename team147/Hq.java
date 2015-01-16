@@ -8,10 +8,10 @@ public class Hq extends BaseRobot {
 	public Hq(RobotController myRC) throws GameActionException {
 		super(myRC);
 		int numBeaversSpawned = 0;
-		getAndSetRallyPoint(getEnemyHQLoc());
+		messaging.setRallyPoint(getDefaultRallyPoint(enemyHQLoc));
 		while (true) {
 			attackLeastHealthyEnemy();
-			if (numBeaversSpawned++ < 10 || rand.nextDouble() < .01)
+			if (numBeaversSpawned++ < 5 || rand.nextDouble() < .01)
 				spawnRobot(RobotType.BEAVER);
 			transferSupply();
 			rc.yield();
