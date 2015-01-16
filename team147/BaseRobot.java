@@ -21,6 +21,8 @@ public abstract class BaseRobot {
 	public BaseRobot(RobotController rc) {
 		this.rc = rc;
 		rand = new Random(rc.getID());
+		messaging = new Messenger(rc);
+		currentDirection = randomDirection();
 	}
 
 	public void attackEnemyTowerZero() throws GameActionException {
@@ -35,6 +37,9 @@ public abstract class BaseRobot {
 	public MapLocation getAndSetRallyPoint(MapLocation attackLocation)
 			throws GameActionException {
 		MapLocation ourHQ = rc.senseHQLocation();
+
+		System.out.println("Attack Location x: " + attackLocation.x);
+		System.out.println("Attack Location y: " + attackLocation.y);
 
 		MapLocation rallyPoint = ourHQ.add(ourHQ.directionTo(attackLocation),
 				(int) (Math.sqrt(ourHQ.distanceSquaredTo(attackLocation)) / 4));
@@ -85,6 +90,30 @@ public abstract class BaseRobot {
 							.nextDouble())));
 	}
 
+	public void safeMoveAround(int numTurns) throws GameActionException {
+		if (rc.isCoreReady()) {
+			if (rc.canMove(currentDirection) && directionSafeFromTowers()) {
+				if (rand.nextInt(100) > 10) {
+					rc.move(currentDirection);
+				} else {
+					currentDirection = currentDirection.rotateRight();
+					if (rc.canMove(currentDirection)
+							&& directionSafeFromTowers()) {
+						rc.move(currentDirection);
+					} else {
+						currentDirection = currentDirection.rotateRight();
+						if (numTurns < 8)
+							safeMoveAround(numTurns++);
+					}
+				}
+			} else {
+				currentDirection = currentDirection.rotateRight();
+				if (numTurns < 8)
+					safeMoveAround(numTurns++);
+			}
+		}
+	}
+
 	public void safeMoveAround() throws GameActionException {
 		if (rc.isCoreReady()) {
 			if (rc.canMove(currentDirection) && directionSafeFromTowers()) {
@@ -97,12 +126,12 @@ public abstract class BaseRobot {
 						rc.move(currentDirection);
 					} else {
 						currentDirection = currentDirection.rotateRight();
-						safeMoveAround();
+						safeMoveAround(1);
 					}
 				}
 			} else {
 				currentDirection = currentDirection.rotateRight();
-				safeMoveAround();
+				safeMoveAround(1);
 			}
 		}
 	}
@@ -258,7 +287,7 @@ public abstract class BaseRobot {
 	}
 
 	public void mine() throws GameActionException {
-		int mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
+		double mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
 				: GameConstants.BEAVER_MINE_MAX);
 
 		if (rc.isCoreReady() && rc.senseOre(rc.getLocation()) > mineMax) {

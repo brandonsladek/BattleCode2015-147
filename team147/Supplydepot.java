@@ -1,10 +1,12 @@
 package team147;
 
+import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Supplydepot extends BaseRobot {
-	public Supplydepot(RobotController myRC) {
+	public Supplydepot(RobotController myRC) throws GameActionException {
 		super(myRC);
+		messaging.incrementNumSupplydepotsSpawned();
 		while (true) {
 			rc.yield();
 		}
