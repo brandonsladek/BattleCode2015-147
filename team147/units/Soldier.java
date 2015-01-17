@@ -24,7 +24,7 @@ public class Soldier extends BaseRobot {
 			case DEFEND:
 				defaultDefendAction();
 				break;
-			case ECON:
+			case SIEGE:
 				defaultEconAction();
 				break;
 			case EXPLORE:
@@ -42,32 +42,27 @@ public class Soldier extends BaseRobot {
 	}
 
 	@Override
-	public void defaultPanicAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultPanicAction() throws GameActionException {
+		moveTowardDestination(rc.senseHQLocation());
 	}
 
 	@Override
-	public void defaultAttackAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultAttackAction() throws GameActionException {
+		attackLeastHealthyEnemy();
 	}
 
 	@Override
-	public void defaultDefendAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultDefendAction() throws GameActionException {
+		attackLeastHealthyEnemy();
 	}
 
 	@Override
-	public void defaultEconAction() {
-		// TODO Auto-generated method stub
-		
+	public void defaultEconAction() throws GameActionException {
+		moveAround();	
 	}
 
 	@Override
 	public void defaultExploreAction() {
-		// TODO Auto-generated method stub
 		
 	}
 

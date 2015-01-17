@@ -2,6 +2,8 @@ package team147.util.statemachines;
 
 import team147.BaseRobot;
 import team147.util.StateMachine;
+import battlecode.common.Clock;
+import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -14,17 +16,12 @@ public class AttackStateMachine extends StateMachine {
 		currentState = updateState();
 	}
 
-	RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,br.enemyTeam);
-	RobotInfo allies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared, br.myTeam);
-	
-	
-	
 	//Information Methods (methods that get data we can use to make state decisions)
-	
-	
 	private double getEnemyAllyDifferential(){	//Determines the enemy:ally ratio within the sensor radius squared
+		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,br.enemyTeam);
+		RobotInfo allies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared, br.myTeam);
 		int enemyPower = 0;
-		int allyPower = 0;
+		int allyPower = 1; // just so we never divide by 0
 		
 		RobotType type;
 		for(RobotInfo r: enemies){
@@ -56,6 +53,8 @@ public class AttackStateMachine extends StateMachine {
 				break;
 			case MINER:
 				enemyPower+=3;
+				break;
+			default:
 				break;
 			}
 		}
@@ -90,6 +89,8 @@ public class AttackStateMachine extends StateMachine {
 			case MINER:
 				allyPower+=3;
 				break;
+			default:
+				break;
 			}
 		}
 		switch (br.rc.getType()){
@@ -120,79 +121,52 @@ public class AttackStateMachine extends StateMachine {
 		case MINER:
 			allyPower+=3;
 			break;
+		default:
+			break;
 		}
-				//Note: Things to think about - Bashers can attack all squares around it, Commanders increase hit points of units around it, etc
-		
-		//The higher the ratio, the worse the situation.
-		double ratio = enemyPower/allyPower;	
-		
-		return ratio;			//Note: If we need to lower bytecodes, could save this ratio as a variable, and only update that variable every other round
-	}
+        // if the ratio is greater than 100 BAD, less than 100 GOOD
+		double ratio = 100 * (enemyPower/allyPower);	
+		return ratio;
+	} // end of getEnemyAllyDifferential method
 
-	
-	
 	//Methods that might already exist:
 		//getEnemyTowerHealth()
 		//getAllyTowerHealth()
 		//getHQHealth()
 		//getEnemyHQHealth()
 	
-	
-	
 	public State updateState() {
-		
-		if(getEnemyAllyDifferential()>)
-		
-		
-		
-	//Note: Maybe later, add logic that is specific to robot type
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		MapLocation currentLoc = br.rc.getLocation();
-
-		
-		
-		if(enemies.length > allies.length){
-			return
+		double diff = getEnemyAllyDifferential();
+		int hqThreat = 0;
+		try {
+			hqThreat = br.rc.readBroadcast(1000);
+		} catch (GameActionException e) {
+			e.printStackTrace();
 		}
-		
-
-		
-		
-		
-		
-		if(br.rc.getType()==SOLDIER){
-			
+		int distanceFromOurHQ = br.rc.getLocation().distanceSquaredTo(br.rc.senseHQLocation());
+		int distanceFromEnemyHQ = br.rc.getLocation().distanceSquaredTo(br.rc.senseEnemyHQLocation());
+		int roundNum = Clock.getRoundNum();
+		if(diff < 75 && hqThreat < 125) {
+			return State.ATTACK;
+		} 
+		if(diff > 125) {
+			return State.PANIC;
 		}
-		
-		return State.ATTACK;
-		
-		
-		return State.DEFEND;
-		
+		if(hqThreat > 150 && (distanceFromOurHQ < distanceFromEnemyHQ)) {
+			return State.DEFEND;
+		}
+		if(roundNum > 1700 && roundNum < 1800) {
+			return State.RALLY;
+		}
+		if(roundNum > 1800) {
+			return State.SIEGE;
+		}
 		return State.EXPLORE;
-
-		return State.ECON;
 		
-
-	}
+	} // end of updateState method
 
 	public void sendStateMessages() {
 		// TODO Auto-generated method stub
-
 	}
 
-}
+} // end of AttackStateMachine class

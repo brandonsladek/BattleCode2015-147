@@ -15,17 +15,12 @@ public class Hq extends BaseRobot {
 		while (true) {
 			defaultTurnSetup();
 			attackLeastHealthyEnemy();
+			messaging.broadCastHQPressure();
 			transferSupply();
 			defaultTurnEndAction();
 		}
-	}
+	} // end of HQ constructor
 	
-	
-	
-	
-	
-	
-
 	@Override
 	public void defaultPanicAction() {
 		// TODO Auto-generated method stub
