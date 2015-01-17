@@ -1,5 +1,6 @@
 package team147;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import team147.util.Messenger;
@@ -20,7 +21,7 @@ public abstract class BaseRobot {
 	public Direction currentDirection;
 	public MapLocation enemyHQLoc, hQLoc;
 	public Team enemyTeam, myTeam;
-	public int attackRadiusSquared, sensorRadiusSqured;
+	public int attackRadiusSquared, sensorRadiusSquared;
 
 	public BaseRobot(RobotController rc) {
 		this.rc = rc;
@@ -33,7 +34,7 @@ public abstract class BaseRobot {
 		enemyTeam = myTeam.opponent();
 
 		attackRadiusSquared = rc.getType().attackRadiusSquared;
-		sensorRadiusSqured = rc.getType().sensorRadiusSquared;
+		sensorRadiusSquared = rc.getType().sensorRadiusSquared;
 	}
 
 	public void attackEnemyTowerZero() throws GameActionException {
@@ -154,12 +155,23 @@ public abstract class BaseRobot {
 	}
 
 	public void moveToSafety() throws GameActionException {
-		Direction safeDirections = getSafeDirections();
+		Direction safeDirections[] = getDangerDirs();
 	}
 
-	private Direction getSafeDirections() {
+	private Direction[] getDangerDirs() {
+		RobotInfo enemies[] = rc.senseNearbyRobots(sensorRadiusSquared);
+		MapLocation currentLoc = rc.getLocation();
+		ArrayList<Direction> badDirs = new ArrayList<Direction>();
 
-		return null;
+		for (RobotInfo enemy : enemies) {
+			int enemyAttackRadiusSquared = enemy.type.attackRadiusSquared;
+			if (enemyAttackRadiusSquared <= currentLoc
+					.distanceSquaredTo(enemy.location)) {
+				badDirs.add(currentLoc.directionTo(enemy.location));
+			}
+		}
+
+		return (Direction[]) badDirs.toArray();
 	}
 
 	public boolean directionSafeFromTowers() {
