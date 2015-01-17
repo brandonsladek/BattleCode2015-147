@@ -3,6 +3,8 @@ package team147.util;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class Messenger {
 
@@ -49,6 +51,90 @@ public class Messenger {
 
 	}
 
+//	private void broadCastHQPressure(){
+//		RobotInfo enemies[] = rc.senseNearbyRobots(sensorRadiusSquared, enemyTeam);
+//		RobotInfo allies[] = rc.senseNearbyRobots(sensorRadiusSquared, myTeam);
+//
+//		int enemyPower = 0;
+//		int allyPower = 0;
+//		
+//		RobotType type;
+//		for(RobotInfo r: enemies){
+//			type=r.type;
+//			switch (type){
+//			case SOLDIER:
+//				enemyPower+=8;
+//				break;
+//			case BASHER:
+//				enemyPower+=4;
+//				break;
+//			case DRONE:
+//				enemyPower+=12;
+//				break;
+//			case COMMANDER:
+//				enemyPower+=15;
+//				break;
+//			case TANK:
+//				enemyPower+=25;
+//				break;
+//			case LAUNCHER:
+//				enemyPower+=15;
+//				break;
+//			case MISSILE:
+//				enemyPower+=20;
+//				break;
+//			case BEAVER:
+//				enemyPower+=4;
+//				break;
+//			case MINER:
+//				enemyPower+=3;
+//				break;
+//			}
+//		}
+//		
+//		for(RobotInfo r: allies){
+//			type=r.type;
+//			switch (type){
+//			case SOLDIER:
+//				allyPower+=8;
+//				break;
+//			case BASHER:
+//				allyPower+=4;
+//				break;
+//			case DRONE:
+//				allyPower+=12;
+//				break;
+//			case COMMANDER:
+//				allyPower+=15;
+//				break;
+//			case TANK:
+//				allyPower+=25;
+//				break;
+//			case LAUNCHER:
+//				allyPower+=15;
+//				break;
+//			case MISSILE:
+//				allyPower+=20;
+//				break;
+//			case BEAVER:
+//				allyPower+=4;
+//				break;
+//			case MINER:
+//				allyPower+=3;
+//				break;
+//			}
+//		}
+//		
+//		}
+//				//Note: Things to think about - Bashers can attack all squares around it, Commanders increase hit points of units around it, etc
+//		
+//		//The higher the ratio, the worse the situation.
+//		double ratio = enemyPower/allyPower;	
+//		
+//		
+//	}
+	
+	
 	// Getter and setter methods for each enum:
 
 	public int getNumEnemyBeaversSpotted() throws GameActionException {

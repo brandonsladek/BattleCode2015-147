@@ -1,18 +1,43 @@
 package team147.units;
 
 import team147.BaseRobot;
+import team147.util.statemachines.AttackStateMachine;
+import team147.util.statemachines.EconStateMachine;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Soldier extends BaseRobot {
+	private AttackStateMachine stateMachine;
+	
 	public Soldier(RobotController myRC) throws GameActionException {
 		super(myRC);
+		stateMachine = new AttackStateMachine(this);
+		
+		
 		while (true) {
-			// attackEnemyZero();
-			attackLeastHealthyEnemy();
-			safeMoveTowardsHQ();
-			transferSupply();
-			rc.yield();
+			stateMachine.updateState();
+			defaultTurnSetup();
+			switch (stateMachine.currentState) {
+			case ATTACK:
+				defaultAttackAction();
+				break;
+			case DEFEND:
+				defaultDefendAction();
+				break;
+			case ECON:
+				defaultEconAction();
+				break;
+			case EXPLORE:
+				defaultExploreAction();
+				break;
+			case PANIC:
+				defaultPanicAction();
+				break;
+			default:
+				break;
+			}
+			defaultTurnEndAction();
+			stateMachine.sendStateMessages();
 		}
 	}
 
