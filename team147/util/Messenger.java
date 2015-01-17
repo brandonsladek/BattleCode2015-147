@@ -1,4 +1,4 @@
-package team147;
+package team147.util;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -6,8 +6,7 @@ import battlecode.common.RobotController;
 
 public class Messenger {
 
-	private static RobotController rc;
-	private static MapLocation rallyPoint;
+	private RobotController rc;
 
 	public Messenger(RobotController rc) {
 		this.rc = rc;
@@ -30,6 +29,8 @@ public class Messenger {
 		NUM_MINERFACTORIES_SPAWNED(17),
 
 		NUM_SUPPLYDEPOTS_SPAWNED(18),
+
+		NUM_BEAVERS_SPAWNED(19),
 
 		// Example of a Map Location
 		RALLYPOINT_1X(5), RALLYPOINT_1Y(6);
@@ -212,6 +213,20 @@ public class Messenger {
 
 	public MapLocation getRallyPoint() throws GameActionException {
 		return new MapLocation(getRallyPoint1x(), getRallyPoint1y());
+	}
+
+	public void setRallyPoint(MapLocation rallyPoint)
+			throws GameActionException {
+		setRallyPoint1x(rallyPoint.x);
+		setRallyPoint1y(rallyPoint.y);
+	}
+
+	public void setNumBeaversSpawned(int numBeavers) throws GameActionException {
+		rc.broadcast(ChannelNumber.NUM_BEAVERS_SPAWNED.getValue(), numBeavers);
+	}
+
+	public int getNumBeaversSpawned() throws GameActionException {
+		return rc.readBroadcast(ChannelNumber.NUM_BEAVERS_SPAWNED.getValue());
 	}
 
 }
