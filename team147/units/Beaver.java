@@ -66,9 +66,8 @@ public class Beaver extends BaseRobot {
 	}
 
 	@Override
-	public void defaultPanicAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultPanicAction() throws GameActionException {
+		moveToSafety();
 	}
 
 	@Override
@@ -85,6 +84,9 @@ public class Beaver extends BaseRobot {
 
 	@Override
 	public void defaultEconAction() throws GameActionException {
+		if (getMoveableDirections() <= 3)
+			moveTowardDestination(rc.getLocation().add(
+					rc.getLocation().directionTo(hQLoc).opposite()));
 		build(getNeededBuilding());
 		transferSupply();
 	}
