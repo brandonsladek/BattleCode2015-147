@@ -147,7 +147,7 @@ public abstract class BaseRobot {
 		else if (messaging.getNumHelipadsSpawned() < 2)
 			return RobotType.HELIPAD;
 
-		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 100)
+		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 200)
 			return RobotType.SUPPLYDEPOT;
 
 		else
@@ -155,23 +155,44 @@ public abstract class BaseRobot {
 	}
 
 	public void moveToSafety() throws GameActionException {
-		Direction safeDirections[] = getDangerDirs();
+		if (rc.isCoreReady()) {
+			ArrayList<Direction> badDirections = getDangerDirs();
+			for (Direction d : badDirections) {
+				if (rc.canMove(d.opposite())
+						&& !badDirections.contains(d.opposite())) {
+					rc.move(d.opposite());
+					return;
+				}
+			}
+		}
 	}
 
-	private Direction[] getDangerDirs() {
+	private ArrayList<Direction> getDangerDirs() {
 		RobotInfo enemies[] = rc.senseNearbyRobots(sensorRadiusSquared);
 		MapLocation currentLoc = rc.getLocation();
 		ArrayList<Direction> badDirs = new ArrayList<Direction>();
 
 		for (RobotInfo enemy : enemies) {
 			int enemyAttackRadiusSquared = enemy.type.attackRadiusSquared;
-			if (enemyAttackRadiusSquared <= currentLoc
-					.distanceSquaredTo(enemy.location)) {
+
+			Direction toEnemy = currentLoc.directionTo(enemy.location);
+			if (!badDirs.contains(toEnemy)
+					&& enemyAttackRadiusSquared <= currentLoc
+							.distanceSquaredTo(enemy.location)) {
 				badDirs.add(currentLoc.directionTo(enemy.location));
 			}
 		}
 
-		return (Direction[]) badDirs.toArray();
+		return badDirs;
+	}
+
+	public int getMoveableDirections() {
+		int numMoveable = 0;
+		for (Direction d : Direction.values()) {
+			if (rc.canMove(d))
+				numMoveable++;
+		}
+		return numMoveable;
 	}
 
 	public boolean directionSafeFromTowers() {
@@ -322,15 +343,53 @@ public abstract class BaseRobot {
 
 	public void build(RobotType building) throws GameActionException {
 		if (rc.hasBuildRequirements(building) && rc.isCoreReady()) {
-			for (int i = 0; i < 8; i++) {
-				if (rc.canBuild(currentDirection, building)) {
-					rc.build(currentDirection, building);
-					break;
-				} else
-					currentDirection = currentDirection.rotateRight();
-			}
+			Direction bestBuildDir = getDirectionToBuild();
+			if (rc.canBuild(bestBuildDir, building))
+				rc.build(bestBuildDir, building);
 		}
 	} // end of build method
+
+	private Direction getDirectionToBuild() throws GameActionException {
+		for (Direction d : Direction.values()) {
+			MapLocation testSite = rc.getLocation().add(d);
+			if (rc.senseRobotAtLocation(rc.getLocation().add(d)) == null) {
+
+				if (isABuilding(rc.senseRobotAtLocation(testSite
+						.add(Direction.NORTH_EAST)))
+						|| isABuilding(rc.senseRobotAtLocation(testSite
+								.add(Direction.NORTH_WEST)))
+						|| isABuilding(rc.senseRobotAtLocation(testSite
+								.add(Direction.SOUTH_EAST)))
+						|| isABuilding(rc.senseRobotAtLocation(testSite
+								.add(Direction.SOUTH_WEST))))
+					return d;
+			}
+
+		}
+		return Direction.NONE;
+	}
+
+	public boolean isABuilding(RobotInfo robot) {
+		if (robot == null)
+			return false;
+		switch (robot.type) {
+		case AEROSPACELAB:
+		case BARRACKS:
+		case HANDWASHSTATION:
+		case HELIPAD:
+		case HQ:
+		case MINERFACTORY:
+		case SUPPLYDEPOT:
+		case TANKFACTORY:
+		case TECHNOLOGYINSTITUTE:
+		case TOWER:
+		case TRAININGFIELD:
+			return true;
+		default:
+			return false;
+
+		}
+	}
 
 	public void buildSupplyDepotNearHQ() throws GameActionException {
 		MapLocation currentLoc = rc.getLocation();

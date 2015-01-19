@@ -10,10 +10,9 @@ public class EconStateMachine extends StateMachine {
 
 	public EconStateMachine(BaseRobot br) {
 		super(br);
-		currentState = updateState();
 	}
 
-	public State updateState() {
+	public void updateState() {
 		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,
 				br.enemyTeam);
 		MapLocation currentLoc = br.rc.getLocation();
@@ -22,11 +21,12 @@ public class EconStateMachine extends StateMachine {
 			int enemyAttackRadiusSquared = enemy.type.attackRadiusSquared;
 			if (enemyAttackRadiusSquared <= currentLoc
 					.distanceSquaredTo(enemy.location)) {
-				return State.PANIC;
+				currentState = State.PANIC;
+				return;
 			}
 		}
 
-		return State.ECON;
+		currentState = State.ECON;
 	}
 
 	public void sendStateMessages() {

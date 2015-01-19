@@ -3,15 +3,18 @@ package team147.units;
 import team147.BaseRobot;
 import team147.util.statemachines.EconStateMachine;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Beaver extends BaseRobot {
 	private EconStateMachine stateMachine;
+	MapLocation lastBuildingBuilt;
 
 	public Beaver(RobotController myRC) throws GameActionException {
 		super(myRC);
 		stateMachine = new EconStateMachine(this);
 		defaultSpawnSetup();
+		lastBuildingBuilt = hQLoc;
 
 		while (true) {
 			stateMachine.updateState();
@@ -66,9 +69,8 @@ public class Beaver extends BaseRobot {
 	}
 
 	@Override
-	public void defaultPanicAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultPanicAction() throws GameActionException {
+		moveToSafety();
 	}
 
 	@Override
@@ -85,7 +87,12 @@ public class Beaver extends BaseRobot {
 
 	@Override
 	public void defaultEconAction() throws GameActionException {
+		if (getMoveableDirections() <= 3)
+			moveTowardDestination(lastBuildingBuilt);
 		build(getNeededBuilding());
+		if (rc.isBuildingSomething()) {
+			lastBuildingBuilt = rc.getLocation().add(currentDirection);
+		}
 		transferSupply();
 	}
 

@@ -10,9 +10,7 @@ public class Drone extends BaseRobot {
 		super(myRC);
 		while (true) {
 			attackLeastHealthyEnemy();
-			if (Clock.getRoundNum() < 1500)
-				followEconUnit();
-			else if (Clock.getRoundNum() < 1600)
+			if (Clock.getRoundNum() < 1700)
 				safeMoveTowardDestination(messaging.getRallyPoint());
 			else if (Clock.getRoundNum() < 1750)
 				safeMoveTowardDestination(getClosestTowerLocation());
@@ -44,30 +42,30 @@ public class Drone extends BaseRobot {
 	@Override
 	public void defaultEconAction() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultExploreAction() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultTurnSetup() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultSpawnSetup() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultTurnEndAction() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

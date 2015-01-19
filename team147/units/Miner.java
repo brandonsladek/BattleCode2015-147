@@ -41,8 +41,8 @@ public class Miner extends BaseRobot {
 	}
 
 	@Override
-	public void defaultPanicAction() {
-		// TODO Auto-generated method stub
+	public void defaultPanicAction() throws GameActionException {
+		moveToSafety();
 
 	}
 

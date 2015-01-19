@@ -13,7 +13,7 @@ public abstract class StateMachine {
 		ATTACK, DEFEND, ECON, EXPLORE, PANIC
 	}
 
-	public abstract State updateState();
+	public abstract void updateState();
 
 	public abstract void sendStateMessages();
 }
