@@ -4,7 +4,6 @@ import team147.BaseRobot;
 import team147.util.StateMachine;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
@@ -16,126 +15,131 @@ public class AttackStateMachine extends StateMachine {
 		currentState = updateState();
 	}
 
-	//Information Methods (methods that get data we can use to make state decisions)
-	private double getEnemyAllyDifferential(){	//Determines the enemy:ally ratio within the sensor radius squared
-		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,br.enemyTeam);
-		RobotInfo allies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared, br.myTeam);
+	// Information Methods (methods that get data we can use to make state
+	// decisions)
+	private double getEnemyAllyDifferential() { // Determines the enemy:ally
+												// ratio within the sensor
+												// radius squared
+		RobotInfo enemies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,
+				br.enemyTeam);
+		RobotInfo allies[] = br.rc.senseNearbyRobots(br.sensorRadiusSquared,
+				br.myTeam);
 		int enemyPower = 0;
 		int allyPower = 1; // just so we never divide by 0
-		
+
 		RobotType type;
-		for(RobotInfo r: enemies){
-			type=r.type;
-			switch (type){
+		for (RobotInfo r : enemies) {
+			type = r.type;
+			switch (type) {
 			case SOLDIER:
-				enemyPower+=8;
+				enemyPower += 8;
 				break;
 			case BASHER:
-				enemyPower+=4;
+				enemyPower += 4;
 				break;
 			case DRONE:
-				enemyPower+=12;
+				enemyPower += 12;
 				break;
 			case COMMANDER:
-				enemyPower+=15;
+				enemyPower += 15;
 				break;
 			case TANK:
-				enemyPower+=25;
+				enemyPower += 25;
 				break;
 			case LAUNCHER:
-				enemyPower+=15;
+				enemyPower += 15;
 				break;
 			case MISSILE:
-				enemyPower+=20;
+				enemyPower += 20;
 				break;
 			case BEAVER:
-				enemyPower+=4;
+				enemyPower += 4;
 				break;
 			case MINER:
-				enemyPower+=3;
+				enemyPower += 3;
 				break;
 			default:
 				break;
 			}
 		}
-		
-		for(RobotInfo r: allies){
-			type=r.type;
-			switch (type){
+
+		for (RobotInfo r : allies) {
+			type = r.type;
+			switch (type) {
 			case SOLDIER:
-				allyPower+=8;
+				allyPower += 8;
 				break;
 			case BASHER:
-				allyPower+=4;
+				allyPower += 4;
 				break;
 			case DRONE:
-				allyPower+=12;
+				allyPower += 12;
 				break;
 			case COMMANDER:
-				allyPower+=15;
+				allyPower += 15;
 				break;
 			case TANK:
-				allyPower+=25;
+				allyPower += 25;
 				break;
 			case LAUNCHER:
-				allyPower+=15;
+				allyPower += 15;
 				break;
 			case MISSILE:
-				allyPower+=20;
+				allyPower += 20;
 				break;
 			case BEAVER:
-				allyPower+=4;
+				allyPower += 4;
 				break;
 			case MINER:
-				allyPower+=3;
+				allyPower += 3;
 				break;
 			default:
 				break;
 			}
 		}
-		switch (br.rc.getType()){
+		switch (br.rc.getType()) {
 		case SOLDIER:
-			allyPower+=8;
+			allyPower += 8;
 			break;
 		case BASHER:
-			allyPower+=4;
+			allyPower += 4;
 			break;
 		case DRONE:
-			allyPower+=12;
+			allyPower += 12;
 			break;
 		case COMMANDER:
-			allyPower+=15;
+			allyPower += 15;
 			break;
 		case TANK:
-			allyPower+=25;
+			allyPower += 25;
 			break;
 		case LAUNCHER:
-			allyPower+=15;
+			allyPower += 15;
 			break;
 		case MISSILE:
-			allyPower+=20;
+			allyPower += 20;
 			break;
 		case BEAVER:
-			allyPower+=4;
+			allyPower += 4;
 			break;
 		case MINER:
-			allyPower+=3;
+			allyPower += 3;
 			break;
 		default:
 			break;
 		}
-        // if the ratio is greater than 100 BAD, less than 100 GOOD
-		double ratio = 100 * (enemyPower/allyPower);	
+		// if the ratio is greater than 100 BAD, less than 100 GOOD
+		double ratio = 100 * (enemyPower / allyPower);
 		return ratio;
 	} // end of getEnemyAllyDifferential method
 
-	//Methods that might already exist:
-		//getEnemyTowerHealth()
-		//getAllyTowerHealth()
-		//getHQHealth()
-		//getEnemyHQHealth()
-	
-	public State updateState() {
+	// Methods that might already exist:
+	// getEnemyTowerHealth()
+	// getAllyTowerHealth()
+	// getHQHealth()
+	// getEnemyHQHealth()
+
+	public void updateState() {
 		double diff = getEnemyAllyDifferential();
 		int hqThreat = 0;
 		try {
@@ -143,26 +147,33 @@ public class AttackStateMachine extends StateMachine {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
-		int distanceFromOurHQ = br.rc.getLocation().distanceSquaredTo(br.rc.senseHQLocation());
-		int distanceFromEnemyHQ = br.rc.getLocation().distanceSquaredTo(br.rc.senseEnemyHQLocation());
+		int distanceFromOurHQ = br.rc.getLocation().distanceSquaredTo(
+				br.rc.senseHQLocation());
+		int distanceFromEnemyHQ = br.rc.getLocation().distanceSquaredTo(
+				br.rc.senseEnemyHQLocation());
 		int roundNum = Clock.getRoundNum();
-		if(diff < 75 && hqThreat < 125) {
-			return State.ATTACK;
-		} 
-		if(diff > 125) {
-			return State.PANIC;
+		if (diff < 75 && hqThreat < 125) {
+			currentState = State.ATTACK;
+			return;
 		}
-		if(hqThreat > 150 && (distanceFromOurHQ < distanceFromEnemyHQ)) {
-			return State.DEFEND;
+		if (diff > 125) {
+			currentState = State.PANIC;
+			return;
 		}
-		if(roundNum > 1700 && roundNum < 1800) {
-			return State.RALLY;
+		if (hqThreat > 150 && (distanceFromOurHQ < distanceFromEnemyHQ)) {
+			currentState = State.DEFEND;
+			return;
 		}
-		if(roundNum > 1800) {
-			return State.SIEGE;
+		if (roundNum > 1700 && roundNum < 1800) {
+			currentState = State.RALLY;
+			return;
 		}
-		return State.EXPLORE;
-		
+		if (roundNum > 1800) {
+			currentState = State.SIEGE;
+			return;
+		}
+		currentState = State.EXPLORE;
+
 	} // end of updateState method
 
 	public void sendStateMessages() {
