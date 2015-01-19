@@ -12,7 +12,7 @@ public class AttackStateMachine extends StateMachine {
 
 	public AttackStateMachine(BaseRobot br) {
 		super(br);
-		currentState = updateState();
+		updateState();
 	}
 
 	// Information Methods (methods that get data we can use to make state
