@@ -147,7 +147,7 @@ public abstract class BaseRobot {
 		else if (messaging.getNumHelipadsSpawned() < 2)
 			return RobotType.HELIPAD;
 
-		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 300)
+		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 200)
 			return RobotType.SUPPLYDEPOT;
 
 		else
