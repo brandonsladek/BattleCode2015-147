@@ -3,6 +3,7 @@ package team147.buildings;
 import team147.BaseRobot;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public class Hq extends BaseRobot {
@@ -14,11 +15,12 @@ public class Hq extends BaseRobot {
 		while (true) {
 			defaultTurnSetup();
 			attackLeastHealthyEnemy();
+			messaging.broadCastHQPressure();
 			transferSupply();
 			defaultTurnEndAction();
 		}
-	}
-
+	} // end of HQ constructor
+	
 	@Override
 	public void defaultPanicAction() {
 		// TODO Auto-generated method stub

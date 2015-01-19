@@ -3,6 +3,8 @@ package team147.util;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class Messenger {
 
@@ -49,6 +51,91 @@ public class Messenger {
 
 	}
 
+	// broadcast HQ pressure to channel 1000
+	public void broadCastHQPressure() throws GameActionException{
+		RobotInfo enemies[] = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+		RobotInfo allies[] = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
+
+		int enemyPower = 0;
+		int allyPower = 1; // just so we never divide by 0
+		
+		RobotType type;
+		for(RobotInfo r: enemies){
+			type=r.type;
+			switch (type){
+			case SOLDIER:
+				enemyPower+=8;
+				break;
+			case BASHER:
+				enemyPower+=4;
+				break;
+			case DRONE:
+				enemyPower+=12;
+				break;
+			case COMMANDER:
+				enemyPower+=15;
+				break;
+			case TANK:
+				enemyPower+=25;
+				break;
+			case LAUNCHER:
+				enemyPower+=15;
+				break;
+			case MISSILE:
+				enemyPower+=20;
+				break;
+			case BEAVER:
+				enemyPower+=4;
+				break;
+			case MINER:
+				enemyPower+=3;
+				break;
+			default:
+				break;
+			}
+		}
+		
+		for(RobotInfo r: allies){
+			type=r.type;
+			switch (type){
+			case SOLDIER:
+				allyPower+=8;
+				break;
+			case BASHER:
+				allyPower+=4;
+				break;
+			case DRONE:
+				allyPower+=12;
+				break;
+			case COMMANDER:
+				allyPower+=15;
+				break;
+			case TANK:
+				allyPower+=25;
+				break;
+			case LAUNCHER:
+				allyPower+=15;
+				break;
+			case MISSILE:
+				allyPower+=20;
+				break;
+			case BEAVER:
+				allyPower+=4;
+				break;
+			case MINER:
+				allyPower+=3;
+				break;
+			default:
+				break;
+			}
+		}
+		// if the ratio is over 100, BAD, under 100 GOOD
+		double pressureRatio = 100 * (enemyPower/allyPower);
+		int intPressureRatio = (int) Math.ceil(pressureRatio);
+		rc.broadcast(1000, intPressureRatio);
+		} // end of broadcastHQPressure method
+	
+	
 	// Getter and setter methods for each enum:
 
 	public int getNumEnemyBeaversSpotted() throws GameActionException {

@@ -1,48 +1,68 @@
 package team147.units;
 
 import team147.BaseRobot;
+import team147.util.statemachines.AttackStateMachine;
+import team147.util.statemachines.EconStateMachine;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Soldier extends BaseRobot {
+	private AttackStateMachine stateMachine;
+	
 	public Soldier(RobotController myRC) throws GameActionException {
 		super(myRC);
+		stateMachine = new AttackStateMachine(this);
+		
+		
 		while (true) {
-			// attackEnemyZero();
-			attackLeastHealthyEnemy();
-			safeMoveTowardsHQ();
-			transferSupply();
-			rc.yield();
+			stateMachine.updateState();
+			defaultTurnSetup();
+			switch (stateMachine.currentState) {
+			case ATTACK:
+				defaultAttackAction();
+				break;
+			case DEFEND:
+				defaultDefendAction();
+				break;
+			case SIEGE:
+				defaultEconAction();
+				break;
+			case EXPLORE:
+				defaultExploreAction();
+				break;
+			case PANIC:
+				defaultPanicAction();
+				break;
+			default:
+				break;
+			}
+			defaultTurnEndAction();
+			stateMachine.sendStateMessages();
 		}
 	}
 
 	@Override
-	public void defaultPanicAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultPanicAction() throws GameActionException {
+		moveTowardDestination(rc.senseHQLocation());
 	}
 
 	@Override
-	public void defaultAttackAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultAttackAction() throws GameActionException {
+		attackLeastHealthyEnemy();
 	}
 
 	@Override
-	public void defaultDefendAction() {
-		// TODO Auto-generated method stub
-
+	public void defaultDefendAction() throws GameActionException {
+		attackLeastHealthyEnemy();
 	}
 
 	@Override
-	public void defaultEconAction() {
-		// TODO Auto-generated method stub
-		
+	public void defaultEconAction() throws GameActionException {
+		moveAround();	
 	}
 
 	@Override
 	public void defaultExploreAction() {
-		// TODO Auto-generated method stub
 		
 	}
 
