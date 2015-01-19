@@ -2,18 +2,16 @@ package team147.units;
 
 import team147.BaseRobot;
 import team147.util.statemachines.AttackStateMachine;
-import team147.util.statemachines.EconStateMachine;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Soldier extends BaseRobot {
 	private AttackStateMachine stateMachine;
-	
+
 	public Soldier(RobotController myRC) throws GameActionException {
 		super(myRC);
 		stateMachine = new AttackStateMachine(this);
-		
-		
+
 		while (true) {
 			stateMachine.updateState();
 			defaultTurnSetup();
@@ -49,6 +47,7 @@ public class Soldier extends BaseRobot {
 	@Override
 	public void defaultAttackAction() throws GameActionException {
 		attackLeastHealthyEnemy();
+		harrass();
 	}
 
 	@Override
@@ -58,29 +57,29 @@ public class Soldier extends BaseRobot {
 
 	@Override
 	public void defaultEconAction() throws GameActionException {
-		moveAround();	
+		moveAround();
 	}
 
 	@Override
 	public void defaultExploreAction() {
-		
+
 	}
 
 	@Override
 	public void defaultTurnSetup() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultSpawnSetup() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void defaultTurnEndAction() throws GameActionException {
 		// TODO Auto-generated method stub
-		
+		rc.yield();
 	}
 }
