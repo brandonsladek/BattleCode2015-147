@@ -83,6 +83,8 @@ public class RobotPlayer {
 
 			if (rc.getType() == RobotType.BASHER) {
 				try {
+					RobotInfo[] adjacentEnemies = rc.senseNearbyRobots(2, enemyTeam);
+
 					// BASHERs attack automatically, so let's just move around mostly randomly
 					if (rc.isCoreReady()) {
 						int fate = rand.nextInt(1000);

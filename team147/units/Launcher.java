@@ -10,8 +10,7 @@ public class Launcher extends BaseRobot {
 		while (true) {
 			mine();
 			safeMoveAround();
-			// attackEnemyZero();
-			attackLeastHealthyEnemy();
+			//attackLeastHealthyEnemy();
 			transferSupply();
 			rc.yield();
 		}

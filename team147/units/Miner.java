@@ -10,6 +10,7 @@ public class Miner extends BaseRobot {
 
 	public Miner(RobotController myRC) throws GameActionException {
 		super(myRC);
+		messaging.incrementNumMinersSpawned();
 		stateMachine = new EconStateMachine(this);
 
 		defaultSpawnSetup();
@@ -37,6 +38,7 @@ public class Miner extends BaseRobot {
 				break;
 			}
 			defaultTurnEndAction();
+			rc.yield();
 		}
 	}
 

@@ -38,6 +38,7 @@ public class Soldier extends BaseRobot {
 			}
 			defaultTurnEndAction();
 			stateMachine.sendStateMessages();
+			rc.yield();
 		}
 	}
 

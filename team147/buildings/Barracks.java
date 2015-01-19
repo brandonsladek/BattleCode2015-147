@@ -8,9 +8,10 @@ import battlecode.common.RobotType;
 public class Barracks extends BaseRobot {
 	public Barracks(RobotController myRC) throws GameActionException {
 		super(myRC);
+		messaging.incrementNumBarracksSpawned();
 		while (true) {
-			messaging.incrementNumBarracksSpawned();
 			super.spawnRobot(RobotType.SOLDIER);
+			rc.yield();
 		}
 	}
 

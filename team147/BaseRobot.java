@@ -146,11 +146,13 @@ public abstract class BaseRobot {
 
 		else if (messaging.getNumHelipadsSpawned() < 2)
 			return RobotType.HELIPAD;
+		
+		else if (messaging.getNumTankfactoriesSpawned() < 2)
+			return RobotType.TANKFACTORY;
 
 		else if (messaging.getNumSupplydepotsSpawned() < Clock.getRoundNum() / 100)
 			return RobotType.SUPPLYDEPOT;
 
-		else
 			return RobotType.AEROSPACELAB;
 	}
 
