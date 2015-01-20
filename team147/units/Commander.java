@@ -5,7 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Commander extends BaseRobot {
-	public Commander(RobotController myRC) {
+	public Commander(RobotController myRC) throws GameActionException {
 		super(myRC);
 		while (true) {
 			rc.yield();

@@ -41,31 +41,6 @@ public class Beaver extends BaseRobot {
 			defaultTurnEndAction();
 			stateMachine.sendStateMessages();
 		}
-
-		// while (true) {
-		//
-		// switch (rand.nextInt(6)) {
-		// case 0:
-		// case 1:
-		// case 2:
-		// case 3:
-		// mine();
-		// safeMoveAround();
-		// break;
-		// case 4:
-		// case 5:
-		// build(getNeededBuilding());
-		// default:
-		// mine();
-		// safeMoveAround();
-		// break;
-		// }
-		//
-		// // attackEnemyZero();
-		// attackLeastHealthyEnemy();
-		// transferSupply();
-		// rc.yield();
-		// }
 	}
 
 	@Override
