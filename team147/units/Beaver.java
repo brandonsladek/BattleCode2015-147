@@ -5,6 +5,7 @@ import team147.util.statemachines.EconStateMachine;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 public class Beaver extends BaseRobot {
 	private EconStateMachine stateMachine;
@@ -64,7 +65,9 @@ public class Beaver extends BaseRobot {
 	public void defaultEconAction() throws GameActionException {
 		if (getMoveableDirections() <= 3)
 			moveTowardDestination(lastBuildingBuilt);
-		build(getNeededBuilding());
+		RobotType building = getNeededBuilding();
+		if(building != null)
+			build(building);
 		if (rc.isBuildingSomething()) {
 			lastBuildingBuilt = rc.getLocation().add(currentDirection);
 		}
@@ -79,7 +82,7 @@ public class Beaver extends BaseRobot {
 
 	@Override
 	public void defaultTurnSetup() throws GameActionException {
-		messaging.setNumBeaversSpawned(1);
+		
 	}
 
 	@Override

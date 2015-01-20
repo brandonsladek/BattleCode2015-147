@@ -10,8 +10,7 @@ public class Minerfactory extends BaseRobot {
 		super(myRC);
 		messaging.incrementNumMinerfactoriesSpawned();
 		while (true) {
-			int numMinersSpawned = messaging.getNumMinersSpawned();
-			if (numMinersSpawned < 20)
+			if (messaging.getNumMiners() < 20)
 				spawnRobot(RobotType.MINER);
 			rc.yield();
 		}
