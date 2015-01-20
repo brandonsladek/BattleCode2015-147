@@ -10,7 +10,8 @@ public class Barracks extends BaseRobot {
 		super(myRC);
 		messaging.incrementNumBarracksSpawned();
 		while (true) {
-			super.spawnRobot(RobotType.SOLDIER);
+			if(messaging.getNumSoldiers() < 20)
+				super.spawnRobot(RobotType.SOLDIER);
 			rc.yield();
 		}
 	}

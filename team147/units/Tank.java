@@ -10,9 +10,11 @@ public class Tank extends BaseRobot {
 		super(myRC);
 		while (true) {
 			attackLeastHealthyEnemy();
-			if (Clock.getRoundNum() < 1700)
-				safeMoveTowardDestination(messaging.getRallyPoint());
-			else if (Clock.getRoundNum() < 1750)
+			if(rc.getID()%5 != 0 && Clock.getRoundNum() < 1500)
+				followSoldierOrTankOrDroneUnit();
+			if(Clock.getRoundNum() < 1500)
+				safeMoveAround();
+			else if (Clock.getRoundNum() < 1700)
 				safeMoveTowardDestination(getClosestTowerLocation());
 			else
 				moveTowardDestination(getClosestTowerLocation());

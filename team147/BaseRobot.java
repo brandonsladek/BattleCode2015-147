@@ -93,6 +93,25 @@ public abstract class BaseRobot {
 					(int) ((double) rc.getType().attackRadiusSquared / 2 * rand
 							.nextDouble())));
 	}
+	
+	public void followSoldierOrTankOrDroneUnit() throws GameActionException {
+		RobotInfo allies[] = rc.senseNearbyRobots(
+				rc.getType().attackRadiusSquared, rc.getTeam());
+		RobotInfo allyToFollow = null;
+
+		for (RobotInfo ally : allies) {
+			if (ally.type == RobotType.SOLDIER || ally.type == RobotType.TANK || ally.type == RobotType.DRONE) {
+				allyToFollow = ally;
+				break;
+			}
+		}
+
+		if (allyToFollow != null)
+			safeMoveTowardDestination(allyToFollow.location.add(
+					allyToFollow.location.directionTo(enemyHQLoc),
+					(int) ((double) rc.getType().attackRadiusSquared / 2 * rand
+							.nextDouble())));
+	}
 
 	public void safeMoveAround(int numTurns) throws GameActionException {
 		if (rc.isCoreReady()) {
@@ -141,18 +160,20 @@ public abstract class BaseRobot {
 	}
 
 	public RobotType getNeededBuilding() throws GameActionException {
-		if (rc.readBroadcast(20011) < 2)
+		if (messaging.getNumMinerFactories() < 1)
 			return RobotType.MINERFACTORY;
-		else if (rc.readBroadcast(20001) < 2)
+		else if (messaging.getNumBarracks() < 1)
 			return RobotType.BARRACKS;
-		else if (rc.readBroadcast(20008) < 2)
+		else if (messaging.getNumHelipads() < 3)
 			return RobotType.HELIPAD;
-		else if (rc.readBroadcast(20016) < 2)
+		else if (messaging.getNumTankFactories() < 1)
 			return RobotType.TANKFACTORY;
-		else if (rc.readBroadcast(20014) < Clock.getRoundNum() / 100)
+		else if (messaging.getNumAerospacelabs() < 1)
+			return RobotType.AEROSPACELAB;
+		else if (messaging.getNumSupplyDepots() < Clock.getRoundNum() / 250)
 			return RobotType.SUPPLYDEPOT;
-
-		return RobotType.AEROSPACELAB;
+		
+			return null;
 	}
 
 	public void harrass() throws GameActionException {
