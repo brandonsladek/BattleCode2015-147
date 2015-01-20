@@ -5,7 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Handwashstation extends BaseRobot {
-	public Handwashstation(RobotController myRC) {
+	public Handwashstation(RobotController myRC) throws GameActionException {
 		super(myRC);
 		while (true) {
 			rc.yield();

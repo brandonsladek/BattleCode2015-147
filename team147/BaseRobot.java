@@ -141,20 +141,18 @@ public abstract class BaseRobot {
 	}
 
 	public RobotType getNeededBuilding() throws GameActionException {
-		if (messaging.getNumMinerfactoriesSpawned() < 1)
+		if (rc.readBroadcast(20011) < 2)
 			return RobotType.MINERFACTORY;
-
-		else if (messaging.getNumSupplydepotsSpawned() < (Clock.getRoundNum() - 400) / 200)
+		else if (rc.readBroadcast(20001) < 2)
+			return RobotType.BARRACKS;
+		else if (rc.readBroadcast(20008) < 2)
+			return RobotType.HELIPAD;
+		else if (rc.readBroadcast(20016) < 2)
+			return RobotType.TANKFACTORY;
+		else if (rc.readBroadcast(20014) < Clock.getRoundNum() / 100)
 			return RobotType.SUPPLYDEPOT;
 
-		else if (messaging.getNumBarracksSpawned() < 1)
-			return RobotType.BARRACKS;
-
-		else if (messaging.getNumHelipadsSpawned() < 2)
-			return RobotType.HELIPAD;
-
-		else
-			return RobotType.TANKFACTORY;
+		return RobotType.AEROSPACELAB;
 	}
 
 	public void harrass() throws GameActionException {

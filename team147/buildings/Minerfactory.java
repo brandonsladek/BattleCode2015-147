@@ -9,9 +9,9 @@ public class Minerfactory extends BaseRobot {
 	public Minerfactory(RobotController myRC) throws GameActionException {
 		super(myRC);
 		messaging.incrementNumMinerfactoriesSpawned();
-		int numMinersSpawned = 0;
 		while (true) {
-			if (numMinersSpawned++ < 15 || rand.nextDouble() < .01)
+			int numMinersSpawned = messaging.getNumMinersSpawned();
+			if (numMinersSpawned < 20)
 				spawnRobot(RobotType.MINER);
 			rc.yield();
 		}

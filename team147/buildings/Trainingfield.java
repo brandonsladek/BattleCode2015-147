@@ -5,7 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 
 public class Trainingfield extends BaseRobot {
-	public Trainingfield(RobotController myRC) {
+	public Trainingfield(RobotController myRC) throws GameActionException {
 		super(myRC);
 		while (true) {
 			rc.yield();

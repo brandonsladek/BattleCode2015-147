@@ -10,7 +10,9 @@ public class Tankfactory extends BaseRobot {
 		super(myRC);
 		messaging.incrementNumTankfactoriesSpawned();
 		while (true) {
-			spawnRobot(RobotType.TANK);
+			int numTanksSpawned = messaging.getNumTanksSpawned();
+			if (numTanksSpawned < 10)
+				spawnRobot(RobotType.TANK);
 			rc.yield();
 		}
 	}
