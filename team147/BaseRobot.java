@@ -158,6 +158,58 @@ public abstract class BaseRobot {
 			}
 		}
 	}
+	
+	public void safeMoveTowardOre() throws GameActionException {
+		if (rc.isCoreReady()) {
+			double maxOre = 0.0;
+			Direction toMaxOre = Direction.NONE;
+
+			Direction toTry[] = getDirectionsClosestTo(rc.getLocation()
+					.directionTo(enemyHQLoc).opposite());
+
+			for (Direction d : toTry) {
+				if (d.equals(Direction.OMNI))
+					continue;
+				else if (rc.canMove(d)
+						&& rc.senseOre(rc.getLocation().add(d)) > maxOre
+						&& directionSafeFromTowers(d) && directionSafeFromHQ(d)) {
+					maxOre = rc.senseOre(rc.getLocation().add(d));
+					toMaxOre = d;
+				}
+			}
+			if (maxOre <= getMineMax())
+				safeMoveAround();
+			else if (!toMaxOre.equals(Direction.NONE))
+				rc.move(toMaxOre);
+		}
+	}
+
+	public Direction[] getDirectionsClosestTo(Direction towards) {
+		boolean prioritzeLeft = rand.nextInt(2) == 0;
+
+		int towardsNum = directionNum(towards);
+
+		Direction closestTo[] = new Direction[8];
+		if (prioritzeLeft) {
+			closestTo[0] = towards;
+			for (int i = 1; i < 4; i++) {
+				closestTo[2 * i] = numDirection((towardsNum + i) % 7);
+				closestTo[2 * i - 1] = numDirection((towardsNum - i) % 7);
+			}
+			closestTo[7] = towards.opposite();
+		}
+
+		else {
+			closestTo[0] = towards;
+			for (int i = 1; i < 4; i++) {
+				closestTo[2 * i - 1] = numDirection((towardsNum + i) % 7);
+				closestTo[2 * i] = numDirection((towardsNum - i) % 7);
+			}
+			closestTo[7] = towards.opposite();
+		}
+
+		return closestTo;
+	}
 
 	public RobotType getNeededBuilding() throws GameActionException {
 		if (messaging.getNumMinerFactories() < 1)
@@ -348,13 +400,18 @@ public abstract class BaseRobot {
 	}
 
 	public void mine() throws GameActionException {
-		double mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
-				: GameConstants.BEAVER_MINE_MAX);
+		double mineMax = getMineMax();
 
 		if (rc.isCoreReady() && rc.senseOre(rc.getLocation()) > mineMax) {
 			rc.mine();
 		}
 	} // end of mine method
+
+	public double getMineMax() {
+		double mineMax = (rc.getType() == RobotType.MINER ? GameConstants.MINER_MINE_MAX
+				: GameConstants.BEAVER_MINE_MAX);
+		return mineMax;
+	}
 
 	public void spawnRobot(RobotType type) throws GameActionException {
 		if (rc.hasSpawnRequirements(type) && rc.isCoreReady()) {
@@ -534,8 +591,37 @@ public abstract class BaseRobot {
 			return 6;
 		case NORTH_EAST:
 			return 7;
+		case OMNI:
+			return 8;
 		default:
 			return -1;
+		}
+	} // end of directionNum method
+
+	public Direction numDirection(int directionVal) {
+		if (directionVal < 0)
+			directionVal = 8 + directionVal;
+		switch (directionVal) {
+		case 0:
+			return Direction.NORTH;
+		case 1:
+			return Direction.NORTH_WEST;
+		case 2:
+			return Direction.WEST;
+		case 3:
+			return Direction.SOUTH_WEST;
+		case 4:
+			return Direction.SOUTH;
+		case 5:
+			return Direction.SOUTH_EAST;
+		case 6:
+			return Direction.EAST;
+		case 7:
+			return Direction.NORTH_EAST;
+		case 8:
+			return Direction.OMNI;
+		default:
+			return Direction.NONE;
 		}
 	} // end of directionNum method
 }
