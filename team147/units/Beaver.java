@@ -2,6 +2,7 @@ package team147.units;
 
 import team147.BaseRobot;
 import team147.util.statemachines.EconStateMachine;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -66,7 +67,7 @@ public class Beaver extends BaseRobot {
 		if (getMoveableDirections() <= 3)
 			moveTowardDestination(lastBuildingBuilt);
 		RobotType building = getNeededBuilding();
-		if(building != null)
+		if (building != null)
 			build(building);
 		if (rc.isBuildingSomething()) {
 			lastBuildingBuilt = rc.getLocation().add(currentDirection);

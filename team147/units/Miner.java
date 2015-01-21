@@ -63,7 +63,7 @@ public class Miner extends BaseRobot {
 	@Override
 	public void defaultEconAction() throws GameActionException {
 		mine();
-		safeMoveAround();
+		safeMoveTowardOre();
 	}
 
 	@Override
