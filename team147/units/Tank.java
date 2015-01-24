@@ -56,6 +56,7 @@ public class Tank extends BaseRobot {
 	@Override
 	public void defaultDefendAction() throws GameActionException {
 		attackLeastHealthyEnemy();
+		createFormationAndDefend();
 		rallyToTower();
 	}
 

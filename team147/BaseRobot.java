@@ -65,7 +65,27 @@ public abstract class BaseRobot {
 			moveTowardDestination(dest);
 		} else
 			moveTowardDestination(hQLoc);
-
+	}
+	
+	
+	public void createFormationAndDefend() throws GameActionException {
+		MapLocation myCurrentLoc = rc.getLocation();
+		MapLocation closestTower = getClosestFriendlyTowerLocation();
+		
+		if(myCurrentLoc.distanceSquaredTo(closestTower) < 25) {
+			
+		MapLocation node1 = closestTower.add(closestTower.directionTo(rc.senseEnemyHQLocation()), 3);
+		MapLocation node2 = node1.add(closestTower.directionTo(rc.senseEnemyHQLocation()).rotateLeft(), 3);
+		MapLocation node3 = node1.add(closestTower.directionTo(rc.senseEnemyHQLocation()).rotateRight(), 3);
+		
+			if(rc.getID()%3 == 0) {
+				safeMoveTowardDestination(node1);
+			} else if(rc.getID()%3 == 1) {
+				safeMoveTowardDestination(node2);
+			} else {
+				safeMoveTowardDestination(node3);
+			}
+		}
 	}
 
 	public MapLocation getDefaultRallyPoint(MapLocation attackLocation)
@@ -424,6 +444,25 @@ public abstract class BaseRobot {
 			return closestTower;
 		else
 			return enemyHQLoc;
+	}
+	
+	public MapLocation getClosestFriendlyTowerLocation() {
+		MapLocation friendlyTowers[] = rc.senseTowerLocations();
+
+		int closestDistance = Integer.MAX_VALUE;
+		MapLocation closestTower = null;
+		for (MapLocation tower : friendlyTowers) {
+			int distanceSquaredTo = rc.getLocation().distanceSquaredTo(tower);
+			if (distanceSquaredTo < closestDistance) {
+				closestTower = tower;
+				closestDistance = distanceSquaredTo;
+			}
+		}
+
+		if (closestTower != null)
+			return closestTower;
+		else
+			return hQLoc;
 	}
 
 	public void mine() throws GameActionException {
