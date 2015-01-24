@@ -47,6 +47,27 @@ public abstract class BaseRobot {
 		}
 	}
 
+	public void rallyToTower() throws GameActionException {
+		int towerPressures[] = messaging.getTowerPressure();
+		int maxPressure = 0;
+		int towerToDefend = -1;
+
+		for (int i = 0; i < towerPressures.length; i++) {
+			if (towerPressures[i] > maxPressure) {
+				maxPressure = towerPressures[i];
+				towerToDefend = i;
+			}
+		}
+		MapLocation dest = towerToDefend != -1 ? getTowerLocationByNumber(towerToDefend)
+				: getTowerLocationByNumber(rc.getID() % towerPressures.length);
+
+		if (dest != null) {
+			moveTowardDestination(dest);
+		} else
+			moveTowardDestination(hQLoc);
+
+	}
+
 	public MapLocation getDefaultRallyPoint(MapLocation attackLocation)
 			throws GameActionException {
 		MapLocation rallyPoint = hQLoc.add(hQLoc.directionTo(attackLocation),
@@ -212,17 +233,22 @@ public abstract class BaseRobot {
 		return closestTo;
 	}
 
+	public MapLocation getTowerLocationByNumber(int towerNumber) {
+		MapLocation towers[] = rc.senseTowerLocations();
+		return towers[towerNumber];
+	}
+
 	public RobotType getNeededBuilding() throws GameActionException {
 		if (messaging.getNumMinerFactories() < 1)
 			return RobotType.MINERFACTORY;
-		else if (messaging.getNumBarracks() < 1)
+		else if (messaging.getNumBarracks() < 4)
 			return RobotType.BARRACKS;
-		else if (messaging.getNumHelipads() < 3)
-			return RobotType.HELIPAD;
-		else if (messaging.getNumTankFactories() < 1)
+		else if (messaging.getNumTankFactories() < 2)
 			return RobotType.TANKFACTORY;
-		else if (messaging.getNumAerospacelabs() < 1)
-			return RobotType.AEROSPACELAB;
+		// else if (messaging.getNumHelipads() < 3)
+		// return RobotType.HELIPAD;
+		// else if (messaging.getNumAerospacelabs() < 1)
+		// return RobotType.AEROSPACELAB;
 		else if (messaging.getNumSupplyDepots() < Clock.getRoundNum() / 250)
 			return RobotType.SUPPLYDEPOT;
 

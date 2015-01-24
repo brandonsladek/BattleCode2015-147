@@ -2,6 +2,7 @@ package team147.util.statemachines;
 
 import team147.BaseRobot;
 import team147.util.StateMachine;
+import team147.util.StateMachine.State;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotInfo;
@@ -141,39 +142,25 @@ public class AttackStateMachine extends StateMachine {
 
 	public void updateState() {
 		double diff = getEnemyAllyDifferential();
-		int hqThreat = 0;
-		try {
-			hqThreat = br.rc.readBroadcast(1000);
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
-		int distanceFromOurHQ = br.rc.getLocation().distanceSquaredTo(
-				br.rc.senseHQLocation());
-		int distanceFromEnemyHQ = br.rc.getLocation().distanceSquaredTo(
-				br.rc.senseEnemyHQLocation());
+
 		int roundNum = Clock.getRoundNum();
-		if (diff < 75 && hqThreat < 125) {
+		int roundLimit = br.rc.getRoundLimit();
+
+		if (roundLimit - roundNum < 400) {
 			currentState = State.ATTACK;
 			return;
 		}
-		if (diff > 125) {
+ else if (roundLimit - roundNum < 500) {
+			currentState = State.RALLY;
+			return;
+		} else if (diff > 125) {
 			currentState = State.PANIC;
 			return;
 		}
-		if (hqThreat > 150 && (distanceFromOurHQ < distanceFromEnemyHQ)) {
+ else {
 			currentState = State.DEFEND;
 			return;
 		}
-		if (roundNum > 1700 && roundNum < 1800) {
-			currentState = State.RALLY;
-			return;
-		}
-		if (roundNum > 1800) {
-			currentState = State.SIEGE;
-			return;
-		}
-		currentState = State.EXPLORE;
-
 	} // end of updateState method
 
 	public void sendStateMessages() {

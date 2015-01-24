@@ -39,6 +39,9 @@ public class Messenger {
 		
 		NUM_MINERS_SPAWNED(21),
 
+		TOWER_PRESSURE_ZERO(50), TOWER_PRESSURE_ONE(51), TOWER_PRESSURE_TWO(52), TOWER_PRESSURE_THREE(
+				53), TOWER_PRESSURE_FOUR(54), TOWER_PRESSURE_FIVE(55),
+
 		// Example of a Map Location
 		RALLYPOINT_1X(5), RALLYPOINT_1Y(6);
 
@@ -264,6 +267,51 @@ public class Messenger {
 			throws GameActionException {
 		rc.broadcast(ChannelNumber.NUM_AEROSPACELABS_SPAWNED.getValue(),
 				numSpawned);
+	}
+
+	public int[] getTowerPressure() throws GameActionException {
+
+		int pressure[] = new int[6];
+		for (int i = ChannelNumber.TOWER_PRESSURE_ZERO.getValue(); i <= ChannelNumber.TOWER_PRESSURE_FIVE
+				.getValue(); i++) {
+			pressure[i - ChannelNumber.TOWER_PRESSURE_ZERO.getValue()] = rc
+					.readBroadcast(i);
+		}
+
+		return pressure;
+	}
+
+	public void setTowerPressure(int pressure, int tower)
+			throws GameActionException {
+		
+		switch(tower)
+		{
+		case 0:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_ZERO.getValue(),
+					pressure);
+			break;
+		case 1:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_ONE.getValue(),
+					pressure);
+			break;
+		case 2:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_TWO.getValue(),
+					pressure);
+			break;
+		case 3:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_THREE.getValue(),
+					pressure);
+			break;
+		case 4:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_FOUR.getValue(),
+					pressure);
+			break;
+		case 5:
+			rc.broadcast(ChannelNumber.TOWER_PRESSURE_FIVE.getValue(),
+					pressure);
+			break;
+		}
+
 	}
 
 	public void incrementNumAerospacelabsSpawned() throws GameActionException {
