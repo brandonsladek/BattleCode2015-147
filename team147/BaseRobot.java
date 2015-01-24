@@ -13,6 +13,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 public abstract class BaseRobot {
 	public RobotController rc;
@@ -224,7 +225,7 @@ public abstract class BaseRobot {
 			return RobotType.AEROSPACELAB;
 		else if (messaging.getNumSupplyDepots() < Clock.getRoundNum() / 250)
 			return RobotType.SUPPLYDEPOT;
-		
+
 			return null;
 	}
 
@@ -424,19 +425,24 @@ public abstract class BaseRobot {
 		}
 	} // end of spawnRobot method
 
-	public void build(RobotType building) throws GameActionException {
+	public boolean build(RobotType building) throws GameActionException {
+		if (building == null)
+			return false;
 		if (rc.hasBuildRequirements(building) && rc.isCoreReady()) {
 			Direction bestBuildDir = getDirectionToBuild();
-			if (rc.canBuild(bestBuildDir, building))
+			if (rc.canBuild(bestBuildDir, building)) {
 				rc.build(bestBuildDir, building);
+				return true;
+			}
 		}
+		return false;
 	} // end of build method
 
 	private Direction getDirectionToBuild() throws GameActionException {
 		for (Direction d : Direction.values()) {
 			MapLocation testSite = rc.getLocation().add(d);
-			if (rc.senseRobotAtLocation(rc.getLocation().add(d)) == null) {
-
+			if (rc.senseTerrainTile(testSite) == TerrainTile.NORMAL
+					&& rc.senseRobotAtLocation(rc.getLocation().add(d)) == null) {
 				if (isABuilding(rc.senseRobotAtLocation(testSite
 						.add(Direction.NORTH_EAST)))
 						|| isABuilding(rc.senseRobotAtLocation(testSite
