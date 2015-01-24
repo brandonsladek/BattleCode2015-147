@@ -13,6 +13,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 public abstract class BaseRobot {
 	public RobotController rc;
@@ -44,6 +45,27 @@ public abstract class BaseRobot {
 		} else {
 			moveTowardDestination(enemyTowers[0]);
 		}
+	}
+
+	public void rallyToTower() throws GameActionException {
+		int towerPressures[] = messaging.getTowerPressure();
+		int maxPressure = 0;
+		int towerToDefend = -1;
+
+		for (int i = 0; i < towerPressures.length; i++) {
+			if (towerPressures[i] > maxPressure) {
+				maxPressure = towerPressures[i];
+				towerToDefend = i;
+			}
+		}
+		MapLocation dest = towerToDefend != -1 ? getTowerLocationByNumber(towerToDefend)
+				: getTowerLocationByNumber(rc.getID() % towerPressures.length);
+
+		if (dest != null) {
+			moveTowardDestination(dest);
+		} else
+			moveTowardDestination(hQLoc);
+
 	}
 
 	public MapLocation getDefaultRallyPoint(MapLocation attackLocation)
@@ -211,20 +233,25 @@ public abstract class BaseRobot {
 		return closestTo;
 	}
 
+	public MapLocation getTowerLocationByNumber(int towerNumber) {
+		MapLocation towers[] = rc.senseTowerLocations();
+		return towers[towerNumber];
+	}
+
 	public RobotType getNeededBuilding() throws GameActionException {
 		if (messaging.getNumMinerFactories() < 1)
 			return RobotType.MINERFACTORY;
-		else if (messaging.getNumBarracks() < 1)
+		else if (messaging.getNumBarracks() < 4)
 			return RobotType.BARRACKS;
-		else if (messaging.getNumHelipads() < 3)
-			return RobotType.HELIPAD;
-		else if (messaging.getNumTankFactories() < 1)
+		else if (messaging.getNumTankFactories() < 2)
 			return RobotType.TANKFACTORY;
-		else if (messaging.getNumAerospacelabs() < 1)
-			return RobotType.AEROSPACELAB;
+		// else if (messaging.getNumHelipads() < 3)
+		// return RobotType.HELIPAD;
+		// else if (messaging.getNumAerospacelabs() < 1)
+		// return RobotType.AEROSPACELAB;
 		else if (messaging.getNumSupplyDepots() < Clock.getRoundNum() / 250)
 			return RobotType.SUPPLYDEPOT;
-		
+
 			return null;
 	}
 
@@ -424,19 +451,24 @@ public abstract class BaseRobot {
 		}
 	} // end of spawnRobot method
 
-	public void build(RobotType building) throws GameActionException {
+	public boolean build(RobotType building) throws GameActionException {
+		if (building == null)
+			return false;
 		if (rc.hasBuildRequirements(building) && rc.isCoreReady()) {
 			Direction bestBuildDir = getDirectionToBuild();
-			if (rc.canBuild(bestBuildDir, building))
+			if (rc.canBuild(bestBuildDir, building)) {
 				rc.build(bestBuildDir, building);
+				return true;
+			}
 		}
+		return false;
 	} // end of build method
 
 	private Direction getDirectionToBuild() throws GameActionException {
 		for (Direction d : Direction.values()) {
 			MapLocation testSite = rc.getLocation().add(d);
-			if (rc.senseRobotAtLocation(rc.getLocation().add(d)) == null) {
-
+			if (rc.senseTerrainTile(testSite) == TerrainTile.NORMAL
+					&& rc.senseRobotAtLocation(rc.getLocation().add(d)) == null) {
 				if (isABuilding(rc.senseRobotAtLocation(testSite
 						.add(Direction.NORTH_EAST)))
 						|| isABuilding(rc.senseRobotAtLocation(testSite

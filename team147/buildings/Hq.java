@@ -53,7 +53,7 @@ public class Hq extends BaseRobot {
 	@Override
 	public void defaultTurnSetup() throws GameActionException {
 		numBeaversAlive = messaging.getNumBeavers();
-		if (numBeaversAlive == 0)
+		if (numBeaversAlive < 2)
 			spawnRobot(RobotType.BEAVER);
 	}
 

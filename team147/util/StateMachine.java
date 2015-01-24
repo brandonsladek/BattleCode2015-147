@@ -12,8 +12,6 @@ public abstract class StateMachine {
 	public enum State {
 		/** Attack least healthy enemy in weapon range */
 		ATTACK,
-		/** Swarm the enemy HQ/Towers*/
-		SIEGE,
 		/** Defend our HQ/Towers */
 		DEFEND,
 		/** Building structures */
@@ -22,8 +20,6 @@ public abstract class StateMachine {
 		EXPLORE,
 		/** Retreat from enemies in vicinity*/
 		PANIC,
-		/** Wait for further information */
-		HOLD,
 		/** Have all robots gather at a specified point */
 		RALLY
 	}
